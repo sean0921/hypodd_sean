@@ -13,10 +13,6 @@ c	Local variables:
 	integer		i
 	integer		k	! 2^(no. of chops)
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/ifindi.f,v 1.6 2001/03/08 19:16:07 dinger Exp julian $"/
-	save rcsid
-
       if (n.le.0) then
          ifindi = 0
          return

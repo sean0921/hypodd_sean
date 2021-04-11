@@ -17,10 +17,6 @@ c	Parameters:
 	real	arota
 	doubleprecision r, lat1, lat2, dela, delb, PHI, BETA
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/setorg.f,v 1.8 2001/02/09 01:57:14 julian Exp julian $"/
-	save rcsid
-
 c     O(r)LAT & O(r)LON : origin of cartesian coordinate system
 c      north  w e s t
 

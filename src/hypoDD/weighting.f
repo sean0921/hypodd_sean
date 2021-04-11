@@ -50,9 +50,6 @@ c	Local variables:
 	integer	nncc
 	integer	nnct
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/weighting.f,v 1.12 2001/03/08 18:51:27 klein Exp julian $"/
-	save rcsid
         call datetime(dattim)
 
 c synthetics:

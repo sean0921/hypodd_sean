@@ -49,10 +49,6 @@ c	Built-in functions:  Declarations not needed
 
 c	doubleprecision top,den
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/ph2dt/RCS/delaz.f,v 1.6 2001/02/08 23:34:01 julian Exp $"/
-	save rcsid
-
 	data pi2/1.570796d0/
 	data rad/1.745329d-02/
 	data flat/.993231d0/

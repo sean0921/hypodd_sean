@@ -11,14 +11,10 @@ c	Parameters:
 	integer	m
 	integer	n
 	real	a(maxm)
-	real	b(maxm,maxn)
+	doubleprecision	b(maxm,maxn)
 
 c	Local variables:
 	integer i, j		! Dummy loop indices
-
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/matmult3.f,v 1.4 2001/02/09 01:57:14 julian Exp julian $"/
-	save rcsid
 
       do i=1,m
             do j=1,n

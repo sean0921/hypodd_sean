@@ -1,7 +1,8 @@
 CMD	= ph2dt
 CC	= gcc
-#FC	= g77
-FC	= f77
+FC	= g77
+#FC	= f77
+#FC	= gfortran
 SRCS	= $(CMD).f \
 	  cluster.f datetime.f delaz.f ifindi.f \
 	  indexx.f indexxi.f sorti.f trimlen.f

@@ -38,10 +38,6 @@ c	Local variables:
 	integer		n
 	integer		nn
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/hypoDD/RCS/cluster1.f,v 1.12 2001/02/17 01:20:49 julian Exp $"/
-	save rcsid
-
       write(*,'("clustering ...  ")')
       write(log,'(/,"~ clustering ...  ")')
 
@@ -178,6 +174,7 @@ c     Sort - biggest cluster first
       enddo
 
       write(log,'("# clustered events =",i5)')k
+cfw      write(log,'("# isolated events =",i5,/,8(i8))')
       write(log,'("# isolated events =",i5,/,8(i9))')
      & noclust(1),(noclust(j),j=2,noclust(1)+1)
       write(log,'("# clusters =",i5,"  for min. number of links "

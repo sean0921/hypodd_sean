@@ -15,10 +15,6 @@ c	Local variables:
 	integer	j, l, k		! Dummy loop indices
 	real	sum
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/matmult1.f,v 1.4 2001/02/13 23:55:34 julian Exp julian $"/
-	save rcsid
-
       do j=1,m
          do k=1,m
             sum=0.0

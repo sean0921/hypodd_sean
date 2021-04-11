@@ -64,36 +64,34 @@ c	Local	variables:
 	real		dxavold, dyavold, dzavold, dtavold
 	real		exavold, eyavold, ezavold, etavold
 	real		factor
-	doubleprecision		g(MAXDATA0,MAXEVE0*4)
-	integer		i, j
+	real		g(MAXDATA0,MAXEVE0*4)
+	integer		i, j, k
 	integer		izero
 	integer		k1, k2
 	integer		nndt
 	real		norm(MAXEVE*4)
 	real		norm_test(MAXEVE*4)
-	doubleprecision		q(MAXEVE0*4)
+	real		q(MAXEVE0*4)
 	real		qmin, qmax
 	real		resvar1
 	real		s
 	real		se(MAXEVE0*4)
 	real		tmp(MAXEVE0*4)
-	doubleprecision		u(MAXDATA0,MAXEVE0*4)
-	doubleprecision		v(MAXEVE0*4,MAXEVE0*4)
+	real		u(MAXDATA0,MAXEVE0*4)
+	real		v(MAXEVE0*4,MAXEVE0*4)
 	real		wtinv(MAXDATA0)
 	real		wt(MAXDATA0)
 	real		x(MAXEVE0*4)
+
+	character rcsid*150
+	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/lsfit_svd.f,v 1.10 2001/03/09 22:17:32 dinger Exp julian $"/
+	save rcsid
 
       if (ndt.gt.MAXDATA0-4) stop'>>> Increase MAXDATA0 in hypoDD.inc.'
       if (nev.gt.MAXEVE0) stop'>>> Increase MAXEVE0 in hypoDD.inc.'
 
 c     SVD
 c     Set up full G matrix
-      do i=1,ndt
-         do j=1,nev*4
-            g(i,j)= 0
-         enddo
-      enddo
-
       do i=1,ndt
          if (nsrc.eq.1) then
             k1 = 1
@@ -145,13 +143,36 @@ c     This should make the design matrix non-singular.
          d(ndt+i) = 0.0
          wt(ndt+i) = 1.0
          do j=1,nev
-            g(ndt+i,j*4-4+i) = 1.0
-            g(ndt+i,j*4-3+i) = 0.0
-            g(ndt+i,j*4-2+i) = 0.0
-            g(ndt+i,j*4-1+i) = 0.0
+cfw            g(ndt+i,j*4-4+i) = 0.0
+cfw            g(ndt+i,j*4-3+i) = 0.0
+cfw            g(ndt+i,j*4-2+i) = 0.0
+cfw            g(ndt+i,j*4-1+i) = 0.0
+            g(ndt+i,j*4-3) = 0.0
+            g(ndt+i,j*4-2) = 0.0
+            g(ndt+i,j*4-1) = 0.0
+            g(ndt+i,j*4) = 0.0
+            g(ndt+i,j*4-4+i) = 1.0     ! here is the weight!!
          enddo
       enddo
       nndt = ndt+4
+      write(log,'(a)')'  extra rows added to make mean shift zero: 4'
+
+cfw ZFIX START
+c     Add nev extra rows to make z shift zero.
+c     Constrain z shifts:
+      k= 1
+      do i=1,nev
+         d(nndt+k) = 0.0
+         do j=1,nev*4
+               g(nndt+k,j) = 0
+         enddo
+         g(nndt+k,i*4-1) = 100.0  ! weight here!!
+         k= k+1
+      enddo
+      nndt = nndt+k-1
+      write(log,'(a,i)')
+     & '  extra rows added to constrain z-shift to zero: ',k-1
+cfw ZFIX END
 
 c     Column scaling
       do j=1,4*nev
@@ -273,11 +294,7 @@ c     memory for SVD runs (see above).
 
 c     Errors for the 95% confidence level,
 c     thus multiply the standard errors by 2.7955 
-c100710 Not sure anymore where this number comes from. It should be 1.96 
-c100710 assuming a t-distribution of the residuals. This means that errors were 
-c100710 overestimated by about 40%. see emails by Hilary Martens May, 2010.
-c100710      factor = 2.7955
-      factor = 1.96 
+      factor = 2.7955
       do i=1,nev*4
          se(i) = sqrt(cvm(i,i))*sqrt(resvar1)*factor  ! Weighted variance
       enddo

@@ -13,10 +13,6 @@ c	Parameters:
 c	Local variables:
 	integer	n2
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/mdian1.f,v 1.4 2001/02/03 02:14:48 julian Exp julian $"/
-	save rcsid
-
       CALL SORT(N,X)
       N2=N/2
       IF(2*N2.EQ.N)THEN

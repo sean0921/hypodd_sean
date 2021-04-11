@@ -40,10 +40,6 @@ c	Local variables:
 	integer	i
 	real	x, y
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/trialsrc.f,v 1.8 2001/02/19 00:42:25 julian Exp julian $"/
-	save rcsid
-
 c     Set up parameters for initial inversion
       if (istart.eq.1) then
 c        Cluster center as initial trial source

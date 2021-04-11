@@ -15,12 +15,8 @@ c	Local variables:
 
 	parameter (im= 714025, ia= 4096, ic= 150889)
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/ran.f,v 1.4 2001/02/06 03:04:35 julian Exp julian $"/
-	save rcsid
-
       jhi=jhi-1.0
-      jran= mod(jran*ia+ic,im)         ! generator
+      jran= mod(jran*ia+ic,real(im))         ! generator
       j= jlo+((jhi-jlo+1)*jran)/im
       return
       end

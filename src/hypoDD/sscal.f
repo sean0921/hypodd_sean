@@ -17,10 +17,6 @@ c	Local variables:
 	integer	mp1
 	integer	ns
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/sscal.f,v 1.7 2001/02/15 23:10:19 julian Exp julian $"/
-	save rcsid
-
       if(n.le.0)return
       if(incx.eq.1)goto 20
 

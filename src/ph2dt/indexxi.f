@@ -13,10 +13,6 @@
 	integer	l
 	integer	q
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/indexxi.f,v 1.9 2001/03/09 01:30:00 dinger Exp julian $"/
-	save rcsid
-
       if (n.lt.1) then
          return
       else if (n.eq.1) then

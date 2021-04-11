@@ -15,10 +15,6 @@ c	Local variables:
 	integer	l
 	real	q
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/ph2dt/RCS/indexx.f,v 1.6 2001/03/09 01:33:11 dinger Exp $"/
-	save rcsid
-
       if (n.lt.1) then
          return
       else if (n.eq.1) then

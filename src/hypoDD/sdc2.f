@@ -12,10 +12,6 @@ c	Parameters:
 
 	include "geocoord.inc"
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/sdc2.f,v 1.5 2001/02/03 02:34:46 julian Exp julian $"/
-	save rcsid
-
       if(.not.(i.eq.-1.or.i.eq.1)) stop'SDC>>> specify conversion !!!'
 
       if(i.eq.1)  call redist(x,y,xlat,xlon)

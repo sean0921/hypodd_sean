@@ -41,10 +41,6 @@ c	Local variables:
 	real	tid1, tid2
 	real	tim
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/tiddid.f,v 1.7 2001/02/13 23:50:58 julian Exp julian $"/
-	save rcsid
-
       j1=jl+1
       do 23174m=j1,nl
       tid(m)=0.

@@ -13,10 +13,6 @@ c	Local variables:
 	integer	iia
 	integer	ir
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/hypoDD/RCS/sorti.f,v 1.7 2001/03/08 19:25:18 dinger Exp klein $"/
-	save rcsid
-
       if (n.le.1) then
          return
       endif

@@ -15,10 +15,6 @@ c	Local variables:
 	real	snrm2	! BLAS function
 	real	zero
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/normlz.f,v 1.5 2001/02/06 03:04:35 julian Exp julian $"/
-	save rcsid
-
       zero = 0.0
       one  = 1.0
       beta = snrm2(n, x, 1)

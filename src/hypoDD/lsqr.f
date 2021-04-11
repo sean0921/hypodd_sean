@@ -346,10 +346,6 @@ c	Functions and local variables
 	real	zbar
 	real	zero
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/lsqr.f,v 1.5 2001/02/09 01:57:14 julian Exp julian $"/
-	save rcsid
-
 c     initialize.
       zero   = 0.0
       one    = 1.0

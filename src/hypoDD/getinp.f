@@ -65,12 +65,8 @@ c	Local variables:
 	integer		i
 	integer		ii
 	integer		l
-	character	line*80
+	character	line*200
 	integer		trimlen
-
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/getinp.f,v 1.16 2001/03/09 21:40:23 klein Exp julian $"/
-	save rcsid
 
 c--- newest format: 083000 with iteration step dependent weighting
 c-- open input file:

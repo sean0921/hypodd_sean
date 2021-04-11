@@ -18,10 +18,6 @@ c	Local variables:
 	integer	l
 	integer	leap
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/juliam.f,v 1.4 2001/02/19 01:31:06 julian Exp julian $"/
-	save rcsid
-
 	data kmo/0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334/
 	data leap/1/
 

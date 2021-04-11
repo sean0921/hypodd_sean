@@ -19,33 +19,29 @@ c	Parameters:
 	integer	m1, n1
 	integer	m, n
 	integer	index
-	real	a(m1,n)	! (1..m, 1..n)
-	real	u(m1,n)	! (1..m, 1..n)
-	real	v(n1,n)	! (1..n, 1..n)
-	real	q(n)	! (1..n)
+	doubleprecision	a(m1,n)	! (1..m, 1..n)
+	doubleprecision	u(m1,n)	! (1..m, 1..n)
+	doubleprecision	v(n1,n)	! (1..n, 1..n)
+	doubleprecision	q(n)	! (1..n)
 
 c	Local variables
-	real	c
-	real	e(1000)
-	real	eps
-	real	f
-	real	g
-	real	h
+	doubleprecision	c
+	doubleprecision	e(1000)
+	doubleprecision	eps
+	doubleprecision	f
+	doubleprecision	g
+	doubleprecision	h
 	integer	i, j, k, l
 	integer	iback
 	integer	kback
 	integer	lback
 	integer	lplus
 	integer	l1
-	real	s
-	real	tol
-	real	x
-	real	y
-	real	z
-
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/svd.f,v 1.7 2001/02/13 23:50:58 julian Exp julian $"/
-	save rcsid
+	doubleprecision	s
+	doubleprecision	tol
+	doubleprecision	x
+	doubleprecision	y
+	doubleprecision	z
 
       EPS=1.0E-10
       TOL=1.0E-35

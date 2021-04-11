@@ -29,10 +29,6 @@ c            tkj - depth of event from top of event layer
 c	Local variables:
 	integer	i
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/vmodel.f,v 1.5 2001/02/13 23:50:58 julian Exp julian $"/
-	save rcsid
-
 c	compute square of layer velocity
 	do 10 i=1,nl
    10	vsq(i)=v(i)*v(i)

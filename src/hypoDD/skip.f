@@ -94,10 +94,6 @@ c	Local variables:
 	integer		ndtold
 	integer		sta_itmp(MAXSTA)
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/hypoDD/RCS/skip.f,v 1.11 2001/03/22 00:47:45 felix Exp felix $"/
-	save rcsid
-
       write(log,'("skipping data...")')
 
 c     Skip data with large resiudals

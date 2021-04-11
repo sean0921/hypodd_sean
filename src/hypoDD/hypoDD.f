@@ -1,12 +1,23 @@
       program hypoDD
 
 c Author: Felix Waldhauser, felixw@ldeo.columbia.edu
-c Version 1.1 - 10/2004 - FW 
+c Version 1.3 - 11/2010 - FW
 c
 c started 03/1999 
 c 01-03/2001  clean up & bug fixes by Bruce Julian, Fred Klein, Keith
 c             Richards-Dinger, Felix Waldhauser 
 c 10/2004     Version 1.1: fixed errors listed in BugList to V 1.0.
+c 06/2007     Version 1.2 started. fixed errors listed in Buglist 1.1
+c 06/2007     accomodate negative magnitudes in output format.
+c             real -> doubleprecision: covar,lsfit_svd,matmult2,matmutl3,svd
+c 07/2010     fixed bug in computing rms values for hypoDD.reloc (Zhonhe Zhao)
+c 07/2010     lsfit_svd: Fixed apparent bug in getting 95% confidence errors 
+c             from standard errors. Factor 2.7955 was used, but it should be 
+c             1.96, assuming a t-distribution of the residuals (Hilary Martens)
+c 07/2010     version 1.2
+c 08/2010     now compiles with gfortran  (rcs removed and mod problem fixed)
+c 08/2010     version 1.3
+c 11/2010     fixed /0 problem in rms reporting (NaN in hypoDD.reloc) (c101116)
 c
 c Purpose:
 c Program to determine high-resolution hypocenter locations using the
@@ -25,13 +36,13 @@ c    location algorithm: Method and application to the northern Hayward
 c    fault, Bull. Seismol. Soc. Am., 90, 1353-1368, 2000.
 c
 c For a user guide to hypoDD see USGS open-file report: 
-c    Waldhauser, F., HypoDD: A computer program to compute double-difference 
-c    earthquake locations,  U.S. Geol. Surv. open-file report , 01-113, 
+c    Waldhauser, F., HypoDD: A computer program to compute double-difference
+c    earthquake locations,  U.S. Geol. Surv. open-file report , 01-113,
 c    Menlo Park, California, 2001.
 c
 c The code is continuously being updated and improved, so feel
 c free to send me an occasional request for the newest version:
-c felixw@ldeo.columbia.edu  
+c felixw@ldeo.columbia.edu
 c or goto http://www.ldeo.columbia.edu/~felixw/hypoDD.html
 
 	implicit none
@@ -242,11 +253,6 @@ c or goto http://www.ldeo.columbia.edu/~felixw/hypoDD.html
 	real		yav
 	real		zav
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/hypoDD/RCS/hypoDD.f,v 1.24 2001/04/02 13:56:01 felix Exp felix $"/
-	save rcsid
-
-
       minwght= 0.00001
       rms_ccold= 0
       rms_ctold= 0
@@ -255,7 +261,7 @@ c or goto http://www.ldeo.columbia.edu/~felixw/hypoDD.html
 c--- open log file:
       call freeunit(log)
       open(log,file='hypoDD.log',status='unknown')
-      str1= 'starting hypoDD (v1.1 - 10/2004)...'
+      str1= 'starting hypoDD (v1.3 - 11/2010)...'
       call datetime(dattim)
       write(6,'(a45,a)') str1, dattim
       write(log,'(a45,a)') str1, dattim
@@ -420,13 +426,15 @@ c--- write output (mdat.loc):
       write(fu0,'(i9,1x,f10.6,1x,f11.6,1x,f9.3,1x,f10.1,1x,f10.1,
      & 1x,f10.1,
      & 1x,f8.1,1x,f8.1,1x,f8.1,1x,i4,1x,i2,1x,i2,1x,i2,1x,i2,1x,f5.2,
-     & 1x,f3.1,1x,i3)')
+     & 1x,f4.1,1x,i3)')
+cfw     & 1x,f3.1,1x,i3)')	neg mag format
      & (ev_cusp(i),ev_lat(i),ev_lon(i),ev_dep(i),ev_x(i),ev_y(i),
      & ev_z(i),ev_herr(i)*1000,ev_herr(i)*1000,ev_zerr(i)*1000,
      & int(ev_date(i)/10000),
      & int(mod(ev_date(i),10000)/100),mod(ev_date(i),100),
      & int(ev_time(i)/1000000),int(mod(ev_time(i),1000000)/10000),
-     & mod(real(ev_time(i)),10000)/100,ev_mag(i),iclust,i=1,nev)
+     & mod(real(ev_time(i)),10000.)/100,ev_mag(i),iclust,i=1,nev)
+cfw100806     & mod(real(ev_time(i)),10000)/100,ev_mag(i),iclust,i=1,nev)
 
 c--- get initial trial sources:
       call trialsrc(istart,sdc0_lat,sdc0_lon,sdc0_dep,
@@ -554,6 +562,7 @@ c--- least square fitting:
      & rms_cc,rms_ct,rms_cc0,rms_ct0,
      & rms_ccold,rms_ctold,rms_cc0old,rms_ct0old,
      & tmp_xp,tmp_yp,tmp_zp,dt_idx)
+
       else
          call lsfit_lsqr(log,iter,ndt,nev,nsrc,damp,mod_ratio,
      & idata,ev_cusp,src_cusp,
@@ -737,12 +746,14 @@ c--- write output scratch mdat.reloc:
       write(iunit,'(i9,1x,f10.6,1x,f11.6,1x,f9.3,1x,f10.1,1x,f10.1,
      & 1x,f10.1,
      & 1x,f8.1,1x,f8.1,1x,f8.1,1x,i4,1x,i2,1x,i2,1x,i2,1x,i2,1x,f6.3,
-     & 1x,f3.1,1x,i3)')
+     & 1x,f4.1,1x,i3)')
+cfw     & 1x,f3.1,1x,i3)')		! negative mag
      & (src_cusp(i),src_lat(i),src_lon(i),src_dep(i),src_x(i),src_y(i),
      & src_z(i),src_ex(i),src_ey(i),src_ez(i),int(ev_date(i)/10000),
      & int(mod(ev_date(i),10000)/100),mod(ev_date(i),100),
      & int(ev_time(i)/1000000),int(mod(ev_time(i),1000000)/10000),
-     & mod(real(ev_time(i)),10000)/100,ev_mag(i),iclust,i=1,nev)
+     & mod(real(ev_time(i)),10000.)/100,ev_mag(i),iclust,i=1,nev)
+cfw100806     & mod(real(ev_time(i)),10000)/100,ev_mag(i),iclust,i=1,nev)
       close(iunit)
 c WARNING: variable "str" is set to zero value by default
       write(log,'(/,"Relocation results for this iteration are"
@@ -871,7 +882,9 @@ c--- update origin time (this is only done for final output!!)
          imn= int(mod(ev_time(i),1000000)/10000)
          itf= JULIAM(iyr,imo,idy,ihr,imn)
 
-         sc= (mod(real(ev_time(i)),10000)/100) - src_t(i)
+cfw         sc= (mod(real(ev_time(i)),10000)/100) + src_t(i)
+         sc= (mod(real(ev_time(i)),10000.)/100) - src_t(i)
+cfw100806         sc= (mod(real(ev_time(i)),10000)/100) - src_t(i)
          itf= itf + int(sc / 60.)
          sc=  sc  - int(sc / 60.)*60.
          if(sc.lt.0) then
@@ -919,8 +932,20 @@ c--- get # of obs per event:
          endif
       enddo
       do i=1,nev
-         src_rmsc(i)= sqrt(src_rmsc(i)/nev)
-         src_rmsn(i)= sqrt(src_rmsn(i)/nev)
+c100710         src_rmsc(i)= sqrt(src_rmsc(i)/nev)
+c100710         src_rmsn(i)= sqrt(src_rmsn(i)/nev)
+c101116         src_rmsc(i)= sqrt(src_rmsc(i)/(src_np(i)+src_ns(i)))
+c101116         src_rmsn(i)= sqrt(src_rmsn(i)/(src_nnp(i)+src_nns(i)))
+         if(src_np(i)+src_ns(i).gt.0) then
+            src_rmsc(i)= sqrt(src_rmsc(i)/(src_np(i)+src_ns(i)))
+         else
+            src_rmsc(i)= -9 
+         endif
+         if(src_nnp(i)+src_nns(i).gt.0) then
+            src_rmsn(i)= sqrt(src_rmsn(i)/(src_nnp(i)+src_nns(i)))
+         else
+            src_rmsn(i)= -9 
+         endif
       enddo
 
 c--- output final residuals: mdat.res
@@ -941,17 +966,20 @@ c--- output final locations (mdat.reloc):
       write(fu1,'(i9,1x,f10.6,1x,f11.6,1x,f9.3,1x,f10.1,1x,f10.1,
      & 1x,f10.1,
      & 1x,f8.1,1x,f8.1,1x,f8.1,1x,i4,1x,i2,1x,i2,1x,i2,1x,i2,1x,f6.3,
-     & 1x,f3.1,1x,i5,1x,i5,1x,i5,1x,i5,1x,f6.3,1x,f6.3,1x,i3)')
+     & 1x,f4.1,1x,i5,1x,i5,1x,i5,1x,i5,1x,f6.3,1x,f6.3,1x,i3)')
+cfw     & 1x,f3.1,1x,i5,1x,i5,1x,i5,1x,i5,1x,f6.3,1x,f6.3,1x,i3)') !neg mag
      & (src_cusp(i),src_lat(i),src_lon(i),src_dep(i),src_x(i),src_y(i),
      & src_z(i),src_ex(i),src_ey(i),src_ez(i),int(ev_date(i)/10000),
      & int(mod(ev_date(i),10000)/100),mod(ev_date(i),100),
      & int(ev_time(i)/1000000),int(mod(ev_time(i),1000000)/10000),
-     & mod(real(ev_time(i)),10000)/100,ev_mag(i),
+     & mod(real(ev_time(i)),10000.)/100,ev_mag(i),
+cfw100806     & mod(real(ev_time(i)),10000)/100,ev_mag(i),
      & src_np(i),src_ns(i),src_nnp(i),src_nns(i),
      & src_rmsc(i),src_rmsn(i), iclust,i=1,nev)
 
 c--- output stations (mdat.station):
       if(trimlen(fn_stares).gt.1) then
+cfw         write(fu3,'(a5,1x,f9.4,1x,f9.4,1x,f9.4,1x,f9.4,1x,i7,1x,
          write(fu3,'(a7,1x,f9.4,1x,f9.4,1x,f9.4,1x,f9.4,1x,i7,1x,
      & i7,1x,i7,1x,i7,1x,f9.4,1x,f9.4,1x,i3)')
      & (sta_lab(i),sta_lat(i),sta_lon(i),sta_dist(i),sta_az(i),

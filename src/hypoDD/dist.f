@@ -17,10 +17,6 @@ c	Local variables:
 
 	include "geocoord.inc"
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/dist.f,v 1.6 2001/02/06 03:04:35 julian Exp julian $"/
-	save rcsid
-
 c Set up short distance conversion by subr. SETORG
       q=60*xlat-olat
       yp=q+olat

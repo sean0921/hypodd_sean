@@ -26,10 +26,6 @@ c	Local variables:
 	integer k
 	integer kk
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/aprod.f,v 1.5 2001/02/02 21:30:44 julian Exp julian $"/
-	save rcsid
-
 c	set the ranges the indices in vector iw
 
 	kk=iw(1)

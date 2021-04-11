@@ -1,7 +1,7 @@
 CMD	= ncsn2pha
 CC	= gcc
-#FC	= g77
-FC	= f77
+FC	= g77
+#FC	= f77
 SRCS	= $(CMD).f
 CSRCS	= 
 OBJS	= $(SRCS:%.f=%.o) $(CSRCS:%.c=%.o)

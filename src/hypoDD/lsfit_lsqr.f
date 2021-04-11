@@ -101,10 +101,6 @@ c	Local variables:
 	real		x(MAXEVE*4)	! Solution vector
 	real		xnorm
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/lsfit_lsqr.f,v 1.13 2001/03/09 22:17:32 dinger Exp julian $"/
-	save rcsid
-
       write(log,'(/,"~ setting up G matrix.. ")')
 
 c     If mean shift not contstrained

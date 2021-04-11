@@ -19,10 +19,6 @@ c	Local variables:
 	real		yp
 	real		xx, yy
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/redist.f,v 1.8 2001/02/19 01:56:17 julian Exp julian $"/
-	save rcsid
-
       xx=xkm
       yy=ykm
 

@@ -1,6 +1,6 @@
 c Compute travel time, etc., for direct (upward-departing) ray
 
-	subroutine direct1(nl, v, vsq, thk, jl, tkj, delta, depth, tdir, u, x)
+	subroutine direct1(nl,v,vsq,thk,jl,tkj,delta,depth,tdir,u,x)
 
 	implicit none
 
@@ -58,10 +58,6 @@ c	Local variables:
 	real		vlmax
 	real		xa, xb		! Bounds on x
 	real		xtest
-
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/direct1.f,v 1.8 2001/02/14 00:16:18 julian Exp julian $"/
-	save rcsid
 
 	if (jl .eq. 1) then
 c	   Focus in surface layer

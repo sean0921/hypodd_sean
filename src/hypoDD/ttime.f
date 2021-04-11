@@ -28,10 +28,6 @@ c	Local variables:
 	real	x
 	real	xovmax
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/ttime.f,v 1.5 2001/02/13 23:50:58 julian Exp julian $"/
-	save rcsid
-
 c	compile and link for S
 c	f77 -c ttime.f
 c	ld -r -dn ttime.o

@@ -113,10 +113,6 @@ c	Local variables:
         real 		PI
         parameter       (PI=3.141593)
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/getdata.f,v 1.17 2001/03/13 22:33:30 felix Exp julian $"/
-	save rcsid
-
       call datetime (dattim)
       write (*,'("Reading data ...   ",a)') dattim
       write (log,'(/,"~ Reading data ...   ",a)') dattim
@@ -199,7 +195,7 @@ c--End earthquake read loop
             enddo
             if (k.eq.0) write(*,*) icusp (i),' is missing.'
             if (k.ge.2) then
-                write(*,*) icusp (i),' is non-unique.'
+                write(*,*) icusp (i),' is non-unique.'  
                 stop'Event ID must be unique!'
             endif
          enddo

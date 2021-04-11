@@ -21,10 +21,6 @@ c	Local variables:
 	real	xmax
 	real	zero
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/snrm2.f,v 1.6 2001/02/13 23:50:58 julian Exp julian $"/
-	save rcsid
-
 	data   zero, one /0.0e0, 1.0e0/
 
 c     if    n .le. 0 return with result = 0.

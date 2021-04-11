@@ -53,10 +53,6 @@ c	Local variables:
 	real	sw_cc
 	real	sw_ct
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/resstat.f,v 1.10 2001/03/07 04:43:09 felix Exp julian $"/
-	save rcsid
-
 c--- get rms:
       rms_cc0old= rms_cc0
       rms_ct0old= rms_ct0
@@ -151,8 +147,10 @@ c--- more: residual average, rms, and variance:
       else
          dvar= dvar / 1   ! / by the # of degrees of freedom
          dvar1= dvar1 / 1
-         write(*,*)'>>> ndt < 4*nev'
-         write(log,*)'>>> ndt < 4*nev'
+c         write(*,*)'>>> ndt < 4*nev'
+c         write(log,*)'>>> ndt < 4*nev'
+         write(*,*)'>>> Warning: ndt < 4*nev'
+         write(log,*)'>>> Warning: ndt < 4*nev'
       endif
 
       if(abs(dum+999).lt.0.0001) then   ! orginal data

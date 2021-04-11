@@ -27,10 +27,6 @@ c	Local variables:
 	integer k
 	integer kmo(12)
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/datum.f,v 1.3 2001/02/19 01:37:21 julian Exp julian $"/
-	save rcsid
-
 	data kmo/31,28,31,30,31,30,31,31,30,31,30,31/
 
       k = itf/60

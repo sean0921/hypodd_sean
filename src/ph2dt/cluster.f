@@ -35,10 +35,6 @@ c	Local variables:
 	integer		ia
 	integer		ifindi
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/ph2dt/RCS/cluster.f,v 1.10 2001/03/08 18:25:10 klein Exp $"/
-	save rcsid
-
       write(*,'("clustering ...  ")')
 
 

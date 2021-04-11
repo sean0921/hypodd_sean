@@ -29,10 +29,6 @@ c	Local variables:
 	integer		i
 	real		tt1, tt2
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/dtres.f,v 1.12 2001/03/09 22:17:32 dinger Exp julian $"/
-	save rcsid
-
       write(log,'("~ getting residual vector...")')
 
       if (nsrc.eq.1) then

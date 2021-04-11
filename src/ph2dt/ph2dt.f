@@ -1,12 +1,19 @@
        program ph2dt
 
+c Version 1.3 - 08/2010  same as 1.2, but now compiles with gfortran
+c                         (rcs removed)
+c Version 1.2 - 07/2010
+c Version 1.1 - 10/2004
 c Author: Felix Waldhauser, felixw@ldeo.columbia.edu
-c Version 1.1 - 10/2004 - FW
 c
 c started 03/1999
 c 01-03/2001  clean up & bug fixes by Bruce Julian, Fred Klein, Keith
-c             Richards-Dinger, Felix Waldhauser
+c             Richards-Dinger, Felix Waldhauser 
 c 10/2004     Version 1.1: fixed errors listed in BugList to V 1.0.
+c 05/2005     accomodate format for neg magnitudes 
+c 07/2010     version 1.2
+c 08/2010     now compiles with gfortran  (rcs removed and mod problem fixed)
+c 08/2010     version 1.3 
 c
 c Purpose:
 c Reads and filters absolute travel-time data from network catalogs
@@ -16,6 +23,9 @@ c (i.e. optimize quality and minimize number of links between events).
 c See hypoDD user guide for information on how to use ph2dt.
 
 c For a user guide to ph2dt see USGS open-file report:
+c    Waldhauser, F., HypoDD: A computer program to compute double-difference
+c    earthquake locations,  U.S. Geol. Surv. open-file report , 01-113,
+c    Menlo Park, California, 2001.
 c
 
 c--Reads the input file specified om the command line (ph2dt ph2dt.inp)
@@ -168,11 +178,6 @@ c See hypoDD user guide for a description of the parameters.
 	parameter	(PI=3.141593)
         parameter       (KMPERDEG=111.1949266)
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/ph2dt/RCS/ph2dt.f,v 1.25 2001/04/02 13:56:29 felix Exp felix $"/
-	save rcsid
-
-
 c setpar:
 c--Only standard format is now supported. Conversion from other formats occurs externally
       iformat= 0        ! 0=standard; 1=NCSN (non-y2k/y2k);
@@ -182,7 +187,7 @@ c file with cuspids to select for
 
       log= 20
       open(log,file='ph2dt.log',status='unknown')
-      str= 'starting ph2dt (v1.1 - 10/2004)...'
+      str= 'starting ph2dt (v1.3 - 08/2010)...'
       call datetime(dattim)
       write(6,'(a40,a)') str, dattim
       write(log,'(a40,a)') str, dattim
@@ -385,13 +390,15 @@ c--Inoperable code for reading other formats removed by FWK
 
 c--Fatal error on read messages, added by FWK
 1290  write (6,*) line
+      write (*,'(a)') line
       stop '** Bad earthquake line'
 1292  write (6,*) line
+      write (*,'(a)') line
       stop '** Bad phase line'
 
 c--- start standard data format
 c read header:
-130   read (2,'(a)',end=159) line               ! read header line
+130   read (2,'(a)',end=159) line  		! read header line
       if (line(1:1).eq.'#') goto 160 		! store previous event
 131   if (ii.eq.1) read(2,'(a)',end=200) line  	! read header line
       if (line(1:1).eq.'#') then
@@ -423,7 +430,6 @@ c--- processing for all formats starts here:
             if (cuspid(i).eq.icusp(k)) itake= 1
          enddo
       endif
-
 c--- event selection
 c write header to total event list file:
       write(14,612)date(i),int(rtime),lat(i),
@@ -444,6 +450,8 @@ c write event to selected event list file:
          if (i.gt.MEV) stop'>>> Increase MEV in ph2dt.inc!'
       endif
 
+cfw612   format (i8,2x,i8,2x,f8.4,2x,f9.4,2x,
+cfw     &       f9.3,2x,f3.1,2x,f6.2,2x,f6.2,2x,f5.2,1x,i10)
 612   format (i8,2x,i8,2x,f8.4,2x,f9.4,2x,
      &       f9.3,2x,f4.1,2x,f6.2,2x,f6.2,2x,f5.2,1x,i10)
 
@@ -566,12 +574,12 @@ c remove outliers above the separation-delaytime line:
                   if(p_pha(i,j).eq.'P') vel= 4.
                   if(p_pha(i,j).eq.'S') vel= 2.3
                   if(abs(p_time(i,j)-p_time(k,l)).gt.
-     &               aoffs(indx(m))/vel + 0.5) then
+     &               aoffs(indx(m))/vel + 0.5) then  
                      write(log,'(a,a7,2i9,4f9.3)')'Outlier: ',
      & p_sta(i,j),cuspid(i),cuspid(k),aoffs(indx(m)),p_time(i,j),
      & p_time(k,l),p_time(i,j)-p_time(k,l)
-                     nerr= nerr+1
-                     goto 300
+                     nerr= nerr+1  
+                     goto 300	
                   endif
 
                   iobs=iobs+1

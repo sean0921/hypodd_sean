@@ -5,6 +5,10 @@
      &	tmp_ttp, tmp_tts,
      &	tmp_xp, tmp_yp, tmp_zp)
 
+c Compute partial derivatives for straight ray paths (option for 1D layered 
+c models commented out). Velocity is taken from first entry in the model 
+c specification array in hypoDD.inp.
+
 	implicit none
 
 	include'hypoDD.inc'
@@ -39,9 +43,13 @@ c	Local variables:
 	integer		iunit		! Output unit number
 	real		pi
 	integer		trimlen
-        real            vs(MAXLAY)
+	real		vs(20)
 
 	parameter(pi=3.141593)
+
+	character rcsid*150
+	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/partials.f,v 1.7 2001/02/17 23:54:57 julian Exp julian $"/
+	save rcsid
 
       iunit = 0
       if (trimlen(fn_srcpar).gt.1) then
@@ -65,22 +73,41 @@ c     Get S velocity model
 
 c     Compute epicentral distances, azimuths, angles of incidence,
 c     and P/S-travel times from sources to stations
+
+c the following loop needs some more work. I replaced the ray tracing 
+c with a straight ray path approach, which you can probably get away in 
+c your case. However, you need to get the geometry between source and receiver
+c straight; i.e. you need to include receiver depth (probably easiest to 
+c shift the source by the amount of receiver depth) to get proper incidence
+c angle (ain) and distance (dist). I think this is the only place you need to 
+c change anything. of course, any ray trace can be plugged in here.  
       do i=1,nsta
          do j=1,nsrc
             call delaz2(src_lat(j), src_lon(j), sta_lat(i), sta_lon(i), 
      &                 del, dist, az)
 
-c           1D ray tracing
-            call ttime(dist, src_dep(j), mod_nl, mod_v, mod_top, 
-     &                 tmp_ttp(i, j), ain)
-            call ttime(dist, src_dep(j), mod_nl, vs, mod_top, 
-     &                 tmp_tts(i, j), ain)
-            
-c           Determine wave speed at the hypocenter
-            do k=1,mod_nl
-               if (src_dep(j).le.mod_top(k)) goto 10	! break
-            enddo
-10          continue
+cc           1D ray tracing
+c            call ttime(dist, src_dep(j), mod_nl, mod_v, mod_top, 
+c     &                 tmp_ttp(i, j), ain)
+c            call ttime(dist, src_dep(j), mod_nl, vs, mod_top, 
+c     &                 tmp_tts(i, j), ain)
+
+c	    Straight ray path: 
+c here you need to adopt for receiver depth, i.e. src_dep-sta_dep
+            tmp_ttp(i,j)= sqrt(dist**2 + src_dep(j)**2)/mod_v(1)
+            tmp_tts(i,j)= sqrt(dist**2 + src_dep(j)**2)/vs(1)
+            ain= 180-(atan(dist/src_dep(j))*57.2958)
+
+
+cc           Determine wave speed (k) at the hypocenter
+c            do k=1,mod_nl
+c               if (src_dep(j).le.mod_top(k)) goto 10	! break
+c            enddo
+c10          continue
+
+c	    Straight ray path approach, only first entry in velocity 
+c           array taken:
+            k= 2 
 
 c           Depth derivative
             tmp_zp(i,j) = cos((ain * pi)/180.0)/mod_v(k-1)

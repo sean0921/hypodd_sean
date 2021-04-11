@@ -77,10 +77,6 @@ c	Local variables:
 	real	tinj(20)
 	real	tr(20)
 
-	character rcsid*150
-	data rcsid /"$Header: /home1/crhet/julian/HYPODD/src/hypoDD/RCS/refract.f,v 1.8 2001/02/13 23:56:37 julian Exp julian $"/
-	save rcsid
-
 c  determine tref, kk, didjkk
       call tiddid(jl,nl,v,vsq,thk,tid,did)
       tref=100000.
