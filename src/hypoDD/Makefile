@@ -17,10 +17,10 @@ SRCS	= $(CMD).f \
 CSRCS	= atoangle_.c atoangle.c datetime_.c hypot_.c rpad_.c sscanf3_.c
 OBJS	= $(SRCS:%.f=%.o) $(CSRCS:%.c=%.o)
 INCLDIR	= ../../include
-CFLAGS	= -O -I$(INCLDIR)
+CFLAGS	= -Og -I$(INCLDIR) -ggdb
 
 # Flags for GNU g77 compiler
-FFLAGS	= -O -I$(INCLDIR) -Wall -Wimplicit
+FFLAGS	= -Og -I$(INCLDIR) -Wall -Wimplicit -ggdb
 
 # Flags for SUN f77 compiler
 #FFLAGS	= -I$(INCLDIR)

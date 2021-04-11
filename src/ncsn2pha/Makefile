@@ -6,8 +6,8 @@ FC	= gfortran
 SRCS	= $(CMD).f
 CSRCS	= 
 OBJS	= $(SRCS:%.f=%.o) $(CSRCS:%.c=%.o)
-CFLAGS	= -O
-FFLAGS  = -O  -Wall -Wimplicit
+CFLAGS	= -Og
+FFLAGS  = -Og -Wall -Wimplicit -ggdb
 #FFLAGS	= -O
 
 all: $(CMD)

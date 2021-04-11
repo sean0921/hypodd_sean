@@ -7,7 +7,7 @@ OBJS	= $(SRCS:%.f=%.o)
 INCLDIR	= ../../include
 
 # Flags for GNU g77 compiler
-FFLAGS	= -O -I$(INCLDIR) -Wall -Wimplicit
+FFLAGS	= -Og -I$(INCLDIR) -Wall -Wimplicit -ggdb
 
 # Flags for SUN f77 compiler
 #FFLAGS	= -O -I$(INCLDIR)
