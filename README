@@ -1,0 +1,65 @@
+                         HYPODD_1.0
+
+HypoDD is a Fortran77 computer program package for relocating earthquakes
+with the double-difference algorithm of Waldhauser and Ellsworth (2000).
+This is version 1.0 of hypoDD and should be referenced as Waldhauser
+(2001).  The program has been extensively tested, but is made available
+without warranty.  Users of the program are free to make modifications
+to the programs to meet their particular needs, but are asked not to
+distribute modified code to others.  Tell us about your improvements
+and bug fixes, and we will add them to the code for everyone's benefit.
+
+The complete program package is available via anonymous ftp from 
+swave.wr.usgs.gov.  After login, cd pub/outgoing/HYPODD and get the
+(binary) gzip-compressed tar file HYPODD_1.0.tar.gz .  This file can be
+unpacked with the command
+
+	gunzip -c HYPODD_1.0.tar.gz | tar xf -
+
+		ORGANIZATION OF THE SOURCE CODE
+
+The file HYPODD_1.0.tar.gz contains a directory subtree containing source
+code and associated files implementing the "double-difference" earthquake-
+location method of Waldhauser and Ellsworth (2000).  This README file
+resides in the top-level directory.
+
+CONTENTS OF THE TOP-LEVEL DIRECTORY
+
+    README - This file.
+    doc - Directory containing tutorial documentation.
+    include - Directory containing source-code header files.
+    src - Directory containing source code for commands, in separate
+	subdirectories. 
+    utils - Various utility programs/scripts.
+
+Each directory contains its own README file explaining its contents
+and usage.  For installation of hypoDD see the REAME files in the
+src subtree.
+
+                    TEST CASES AND EXAMPLES
+
+Test and example cases are available via anonymous ftp from swave.wr.usgs.gov
+in the separate tar file HYPODD_examples.tar.gz .  These files are unpacked
+in the same manner as the source-code file, described above.  Each directory
+contains a Readme file.
+
+If the programs abort with 'Killed' when executed, then there is most
+likely not enough memory available on the computer on which the
+programs are started.  Switch to a larger computer or edit hypoDD.inc
+and/or ph2dt.inc in the directory include/ to adjust array dimensions
+according to the size of the problem to be solved or available computer
+memory.
+
+REFERENCES
+
+Waldhauser, Felix, hypoDD -- A program to compute double-difference
+hypocenter locations, U.S. Geological Survey Open-File Report 01-113, 2001.
+
+Waldhauser, Felix, and William L. Ellsworth, A double-difference
+earthquake location algorithm: Method and application to the northern
+Hayward fault, California, BSSA, 90, 1353-1368, 2000.
+
+BUG REPORTS, QUESTIONS, ENHANCEMENTS, ETC.
+
+Please send questions, bug reports, news about how you have improved
+the programs, etc. to julian@usgs.gov , with a copy to felix@andreas.wr.usgs.gov.

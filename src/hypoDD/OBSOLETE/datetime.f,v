@@ -1,0 +1,182 @@
+head	1.6;
+access
+	ellswrth
+	dinger
+	michael
+	stephani
+	oppen
+	klein
+	julian;
+symbols;
+locks; strict;
+comment	@c @;
+
+
+1.6
+date	2001.02.06.22.27.25;	author julian;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2001.02.06.03.14.46;	author julian;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2001.02.06.03.04.35;	author julian;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2001.02.02.22.56.35;	author julian;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2001.01.26.00.31.25;	author julian;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.01.25.21.24.20;	author julian;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.6
+log
+@BUG FIX:  Return a blank string of length 20, as advertized.
+@
+text
+@c Current date and time, as a character string
+c (This version merely returns a string of blanks)
+
+	subroutine datetime(dattim)
+
+	implicit none
+
+c	Parameters:
+	character	dattim*20
+
+	character rcsid*150
+	data rcsid /"$Header: /home/crhet/julian/src/cmd/hypoDD/RCS/datetime.f,v 1.5 2001/02/06 03:14:46 julian Exp $"/
+	save rcsid
+
+      dattim = '                    '
+      return
+      end ! of subroutine datetime
+@
+
+
+1.5
+log
+@Remove declarations of unused variables.
+@
+text
+@d12 1
+a12 1
+	data rcsid /"$Header: /home/crhet/julian/src/cmd/hypoDD/RCS/datetime.f,v 1.4 2001/02/06 03:04:35 julian Exp $"/
+d15 1
+a15 1
+      dattim=''
+@
+
+
+1.4
+log
+@Remove commented-out code.
+@
+text
+@a10 6
+	character	datum*26
+	integer		it
+	integer		itime
+	integer		ctime
+	integer		time
+
+d12 1
+a12 1
+	data rcsid /"$Header: /home/crhet/julian/src/cmd/hypoDD/RCS/datetime.f,v 1.3 2001/02/02 22:56:35 julian Exp $"/
+@
+
+
+1.3
+log
+@Remove subroutine covar to a separate file.
+Clean up declarations.
+@
+text
+@d18 1
+a18 1
+	data rcsid /"$Header: /home/crhet/julian/src/cmd/hypoDD/RCS/datetime.f,v 1.2 2001/01/26 00:31:25 julian Exp $"/
+a21 7
+c      external ctime !$pragma C(ctime)
+c      external sprintf !$pragma C(sprintf)
+c      external time !$pragma C(time)
+c      it=time(itime)
+c      it=ctime(itime)
+c      call sprintf(datum,'%s',%val(it))
+c      dattim=datum(5:24)
+@
+
+
+1.2
+log
+@Add RCS identification string.
+@
+text
+@d1 2
+d4 12
+a15 6
+      subroutine datetime(dattim)       ! Urs Kradolfer, 16.9.91
+c     File:    datetime_sun.f
+c     return UNIX-date and time
+c     Call:    call DATETIME(dattim)
+c     returned value: dattim  is a character*20
+      implicit none
+d18 1
+a18 1
+	data rcsid /"$Header: /home/crhet/julian/src/cmd/hypoDD/RCS/datetime.f,v 1.2 2001/01/25 23:46:12 julian Exp julian $"/
+a20 2
+      character datum*26, dattim*20
+      integer it, itime, ctime, time
+a30 25
+
+      subroutine covar(maxeve0,v,n,q,cvm)
+      implicit none
+      integer*4 maxeve0,n,i,j,k
+      real v(maxeve0*4,maxeve0*4),q(maxeve0*4),
+     &     cvm(maxeve0*4,maxeve0*4), sum
+c     &     wti(maxeve0*4)
+
+c      do i=1,n
+c         wti(i)= 0
+c         if(q(i).ne.0) wti(i)= 1/(q(i)*q(i))
+c      enddo
+      do i=1,n
+         do j=1,i
+           sum= 0
+           do k=1,n
+              if(q(k).ne.0) sum= sum + v(i,k)*v(j,k) * (1/(q(k)*q(k)))
+c              sum= sum + v(i,k)*v(j,k)*wti(k)
+           enddo
+           cvm(i,j)= sum
+           cvm(j,i)= sum
+         enddo
+      enddo
+      return
+      end
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d8 5
+@
