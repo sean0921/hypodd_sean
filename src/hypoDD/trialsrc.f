@@ -49,7 +49,7 @@ c     Set up parameters for initial inversion
 c        Cluster center as initial trial source
          nsrc = 1
          do i=1,nev
-            src_cusp(i) = 0
+            src_cusp(i) = ev_cusp(i)
             src_lon(i) = sdc0_lon
             src_lat(i) = sdc0_lat
             src_dep(i) = sdc0_dep

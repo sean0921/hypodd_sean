@@ -39,7 +39,7 @@ c	Local variables:
 	integer		iunit		! Output unit number
 	real		pi
 	integer		trimlen
-	real		vs(20)
+        real            vs(MAXLAY)
 
 	parameter(pi=3.141593)
 

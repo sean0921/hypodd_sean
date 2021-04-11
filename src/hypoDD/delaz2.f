@@ -1,4 +1,5 @@
 c Compute distance and azimuth on a sphere
+c changes by Felix Waldhauser (fw)
 
 	subroutine delaz2(alat, alon, blat, blon, del, dist, az)
 
@@ -26,7 +27,8 @@ C	Local variables:
 	doubleprecision diflon
 	doubleprecision pi2
 	doubleprecision tana, tanb
-	real		xtop, xden
+cfw	real		xtop, xden	! see comments below
+	doubleprecision top, den
 
 c	Built-in functions: Declarations not needed
 	doubleprecision dtan
@@ -72,18 +74,25 @@ c	Both of these changes were made so that dyn.load
 c	would work in Splus.  For some reason, the ld command
 c	ld -r -d didn't find _d_atan2
 c						WLE 10/16/91
+cfw	xtop = dsin(diflon)
+cfw	xden=(dsin(acol)/dtan(bcol))-dcos(diflon)*dcos(acol)
+cfw	azr=atan2(xtop,xden)
+c changes reversed: fw 02/05/17
+	top = dsin(diflon)
+	den=(dsin(acol)/dtan(bcol))-dcos(diflon)*dcos(acol)
+	azr=datan2(top,den)
 
-	xtop = dsin(diflon)
-	xden=(dsin(acol)/dtan(bcol))-dcos(diflon)*dcos(acol)
-	azr=atan2(xtop,xden)
 c----- convert to degrees
 	del=delr/rad
 	az=azr/rad
 	if(az.lt.0.0) az=360.+az
 c-----compute distance in kilometers
 	colat=pi2-(alatr+blatr)/2.d0
-	radius=6378.163d0*
-     &	(1.d0+3.35278d-3*((1.d0/3.d0)-(dcos(colat)**2)))
+cfw the equatorial radius of the Earth is 6378.137 km (IUGG value)
+cfw the mean equatorial radius from Bott, 1982, is 6378.140 km 
+cfw	radius=6378.163d0*
+cfw     & 	(1.d0+3.35278d-3*((1.d0/3.d0)-(dcos(colat)**2)))
+	radius=6378.140*(1.0+3.37853d-3*((1/3)-((dcos(colat))**2)))
 	dist=delr*radius
 	return
 c  ***** end of subroutine delaz *****

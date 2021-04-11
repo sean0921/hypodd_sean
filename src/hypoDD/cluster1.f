@@ -178,7 +178,7 @@ c     Sort - biggest cluster first
       enddo
 
       write(log,'("# clustered events =",i5)')k
-      write(log,'("# isolated events =",i5,/,8(i8))')
+      write(log,'("# isolated events =",i5,/,8(i9))')
      & noclust(1),(noclust(j),j=2,noclust(1)+1)
       write(log,'("# clusters =",i5,"  for min. number of links "
      & "set to ",i5)')nclust,minobs_ct+minobs_cc

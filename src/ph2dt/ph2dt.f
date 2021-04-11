@@ -1,11 +1,12 @@
        program ph2dt
 
-c Version 1.0 - 03/2001
-c Author: Felix Waldhauser, felix@andreas.wr.usgs.gov
+c Author: Felix Waldhauser, felixw@ldeo.columbia.edu
+c Version 1.1 - 10/2004 - FW
 c
 c started 03/1999
 c 01-03/2001  clean up & bug fixes by Bruce Julian, Fred Klein, Keith
-c             Richards-Dinger, Felix Waldhauser (under RCS by Bruce Julian)
+c             Richards-Dinger, Felix Waldhauser
+c 10/2004     Version 1.1: fixed errors listed in BugList to V 1.0.
 c
 c Purpose:
 c Reads and filters absolute travel-time data from network catalogs
@@ -181,7 +182,7 @@ c file with cuspids to select for
 
       log= 20
       open(log,file='ph2dt.log',status='unknown')
-      str= 'starting ph2dt (v1.0 - 03/2001)...'
+      str= 'starting ph2dt (v1.1 - 10/2004)...'
       call datetime(dattim)
       write(6,'(a40,a)') str, dattim
       write(log,'(a40,a)') str, dattim
@@ -390,7 +391,7 @@ c--Fatal error on read messages, added by FWK
 
 c--- start standard data format
 c read header:
-130   read (2,'(a)',end=160) line  		! read header line
+130   read (2,'(a)',end=159) line               ! read header line
       if (line(1:1).eq.'#') goto 160 		! store previous event
 131   if (ii.eq.1) read(2,'(a)',end=200) line  	! read header line
       if (line(1:1).eq.'#') then
@@ -413,6 +414,7 @@ c read phase data lines
 c--- end standard format
 
 c--- processing for all formats starts here:
+159   if(k.eq.1) goto 200
 160   nobs_ct(i)=k-1
       itake= 1
       if (ncusp.gt.0) then
@@ -443,7 +445,7 @@ c write event to selected event list file:
       endif
 
 612   format (i8,2x,i8,2x,f8.4,2x,f9.4,2x,
-     &       f9.3,2x,f3.1,2x,f6.2,2x,f6.2,2x,f5.2,1x,i10)
+     &       f9.3,2x,f4.1,2x,f6.2,2x,f6.2,2x,f5.2,1x,i10)
 
       if (iformat.eq.0.and.line(1:1).ne.'#') goto 200 	!no ne event
       goto 100
@@ -569,7 +571,7 @@ c remove outliers above the separation-delaytime line:
      & p_sta(i,j),cuspid(i),cuspid(k),aoffs(indx(m)),p_time(i,j),
      & p_time(k,l),p_time(i,j)-p_time(k,l)
                      nerr= nerr+1
-                     goto 300	!cX
+                     goto 300
                   endif
 
                   iobs=iobs+1

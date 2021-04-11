@@ -32,4 +32,4 @@ clean:
 
 atoangle_.o : ../../include/compat.h
 atoangle_.o : ../../include/f77types.h
-ph2dt.o : ph2dt.inc
+ph2dt.o : ../../include/ph2dt.inc

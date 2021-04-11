@@ -191,14 +191,17 @@ c--End earthquake read loop
       write (*,'("# events = ",i5)') nev
       if (ncusp.gt.0 .and. ncusp.ne.nev) then
          write (*,'(//,">>> Events repeated in selection list '//
-     &      'or missing in event file!")')
-         write (*,*) 'Missing events:'
+     &      'or missing/repeated in event file!")')
          do i=1,ncusp
             k = 0
             do j=1,nev
-               if (icusp(i).eq.ev_cusp(j)) k = 1
+               if (icusp(i).eq.ev_cusp(j)) k = k+1
             enddo
-            if (k.eq.0) write(*,*) icusp (i)
+            if (k.eq.0) write(*,*) icusp (i),' is missing.'
+            if (k.ge.2) then
+                write(*,*) icusp (i),' is non-unique.'
+                stop'Event ID must be unique!'
+            endif
          enddo
       endif
       close(iunit)
@@ -404,6 +407,7 @@ c--Store time difference
             dt_idx(i) = 4
             ncts = ncts+1
          else
+            write(*,*)line
             stop '>>> Phase identifier format error.'
          endif
          dt_offs(i)= offs

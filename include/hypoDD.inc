@@ -25,7 +25,7 @@ c     &          MAXCL=    20)
 
 c parameters for medium size problems (e.g. : SUN ULTRA-2, 768 MB RAM)
        parameter(MAXEVE=  13000,    
-     &          MAXDATA=  1300000,
+     &          MAXDATA=  1500000,
      &          MAXEVE0=  30,	
      &          MAXDATA0= 5000,	
      &          MAXLAY=   12,		

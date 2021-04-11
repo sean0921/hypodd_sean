@@ -93,6 +93,11 @@ c	Local	variables:
 c     SVD
 c     Set up full G matrix
       do i=1,ndt
+         do j=1,nev*4
+            g(i,j)= 0
+         enddo
+      enddo
+      do i=1,ndt
          if (nsrc.eq.1) then
             k1 = 1
             k2 = 1

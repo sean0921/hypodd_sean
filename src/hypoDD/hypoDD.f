@@ -1,11 +1,12 @@
       program hypoDD
 
-c Version 1.0 - 03/2001
-c Author: Felix Waldhauser, felix@andreas.wr.usgs.gov
+c Author: Felix Waldhauser, felixw@ldeo.columbia.edu
+c Version 1.1 - 10/2004 - FW 
 c
 c started 03/1999 
 c 01-03/2001  clean up & bug fixes by Bruce Julian, Fred Klein, Keith
-c             Richards-Dinger, Felix Waldhauser (under RCS by Bruce Julian)
+c             Richards-Dinger, Felix Waldhauser 
+c 10/2004     Version 1.1: fixed errors listed in BugList to V 1.0.
 c
 c Purpose:
 c Program to determine high-resolution hypocenter locations using the
@@ -24,11 +25,14 @@ c    location algorithm: Method and application to the northern Hayward
 c    fault, Bull. Seismol. Soc. Am., 90, 1353-1368, 2000.
 c
 c For a user guide to hypoDD see USGS open-file report: 
-c
+c    Waldhauser, F., HypoDD: A computer program to compute double-difference 
+c    earthquake locations,  U.S. Geol. Surv. open-file report , 01-113, 
+c    Menlo Park, California, 2001.
 c
 c The code is continuously being updated and improved, so feel
 c free to send me an occasional request for the newest version:
-c felix@andreas.wr.usgs.gov
+c felixw@ldeo.columbia.edu  
+c or goto http://www.ldeo.columbia.edu/~felixw/hypoDD.html
 
 	implicit none
 
@@ -251,7 +255,7 @@ c felix@andreas.wr.usgs.gov
 c--- open log file:
       call freeunit(log)
       open(log,file='hypoDD.log',status='unknown')
-      str1= 'starting hypoDD (v1.0 - 03/2001)...'
+      str1= 'starting hypoDD (v1.1 - 10/2004)...'
       call datetime(dattim)
       write(6,'(a45,a)') str1, dattim
       write(log,'(a45,a)') str1, dattim
@@ -463,7 +467,7 @@ c--- get weighting parameters for this iteration:
       maxdcc= amaxdcc(i)
       maxdct= amaxdct(i)
       wt_ccp= awt_ccp(i)
-      wt_ccs= awt_ccp(i)
+      wt_ccs= awt_ccs(i)
       wt_ctp= awt_ctp(i)
       wt_cts= awt_cts(i)
       damp= adamp(i)
@@ -858,9 +862,7 @@ c--- update origin time (this is only done for final output!!)
       do i= 1,nev
          src_t(i)= src_t(i)/1000	!from here on src_t in sec!!
          if(src_t(i).gt.5) then
-            write(*,'("FATAL ERROR (src_t). Please report to ",
-     &                "felix@andreas.wr.usgs.gov")')
-            stop
+            write(*,*)'WARNING: org time diff > 5s for ',src_cusp(i)
          endif
          iyr= int(ev_date(i)/10000)
          imo= int(mod(ev_date(i),10000)/100)
@@ -869,7 +871,7 @@ c--- update origin time (this is only done for final output!!)
          imn= int(mod(ev_time(i),1000000)/10000)
          itf= JULIAM(iyr,imo,idy,ihr,imn)
 
-         sc= (mod(real(ev_time(i)),10000)/100) + src_t(i)
+         sc= (mod(real(ev_time(i)),10000)/100) - src_t(i)
          itf= itf + int(sc / 60.)
          sc=  sc  - int(sc / 60.)*60.
          if(sc.lt.0) then
@@ -950,7 +952,7 @@ c--- output final locations (mdat.reloc):
 
 c--- output stations (mdat.station):
       if(trimlen(fn_stares).gt.1) then
-         write(fu3,'(a5,1x,f9.4,1x,f9.4,1x,f9.4,1x,f9.4,1x,i7,1x,
+         write(fu3,'(a7,1x,f9.4,1x,f9.4,1x,f9.4,1x,f9.4,1x,i7,1x,
      & i7,1x,i7,1x,i7,1x,f9.4,1x,f9.4,1x,i3)')
      & (sta_lab(i),sta_lat(i),sta_lon(i),sta_dist(i),sta_az(i),
      & sta_np(i),sta_ns(i),sta_nnp(i),sta_nns(i),
