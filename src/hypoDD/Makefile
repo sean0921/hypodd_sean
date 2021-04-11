@@ -1,7 +1,7 @@
 CMD	= hypoDD
 CC	= gcc
-FC	= g77
-#FC	= gfortran
+#FC	= g77
+FC	= gfortran
 #FC	= f77
 SRCS	= $(CMD).f \
 	  aprod.f cluster1.f covar.f datum.f \
@@ -20,10 +20,10 @@ INCLDIR	= ../../include
 CFLAGS	= -O -I$(INCLDIR)
 
 # Flags for GNU g77 compiler
-#FFLAGS	= -O -I$(INCLDIR) -fno-silent -Wall -implicit
+FFLAGS	= -O -I$(INCLDIR) -Wall -Wimplicit
 
 # Flags for SUN f77 compiler
-FFLAGS	= -I$(INCLDIR)
+#FFLAGS	= -I$(INCLDIR)
 
 # Following line needed on HP-UX (hasn't been tested, though).
 #LDFLAGS	= +U77

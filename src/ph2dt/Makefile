@@ -1,8 +1,8 @@
 CMD	= ph2dt
 CC	= gcc
-FC	= g77
+#FC	= g77
 #FC	= f77
-#FC	= gfortran
+FC	= gfortran
 SRCS	= $(CMD).f \
 	  cluster.f datetime.f delaz.f ifindi.f \
 	  indexx.f indexxi.f sorti.f trimlen.f
@@ -12,10 +12,10 @@ INCLDIR	= ../../include
 CFLAGS	= -I$(INCLDIR) -O
 
 # Flags for GNU g77 compiler
-#FFLAGS	= -O -I$(INCLDIR) -fno-silent -Wall -implicit
+FFLAGS	= -O -I$(INCLDIR)  -Wall -Wimplicit
 
 # Flags for SUN f77 compiler
-FFLAGS	= -O -I$(INCLDIR)
+#FFLAGS	= -O -I$(INCLDIR)
 
 # Following line needed on HP-UX (hasn't been tested, though).
 #LDFLAGS	= +U77
