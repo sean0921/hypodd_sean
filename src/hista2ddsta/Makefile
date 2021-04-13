@@ -1,6 +1,7 @@
 CMD	= hista2ddsta
 #FC	= g77
-FC	= f77
+#FC	= f77
+FC	= gfortran 
 SRCS	= $(CMD).f
 OBJS	= $(SRCS:%.f=%.o)
 INCLDIR	= ../../include

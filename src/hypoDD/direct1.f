@@ -4,11 +4,13 @@ c Compute travel time, etc., for direct (upward-departing) ray
 
 	implicit none
 
+        include "hypoDD.inc"
+
 c	Parameters:
 	integer	nl	! Number of layers		(input)
-	real	v(nl)	! Layer wave speeds		(input)
-	real	vsq(nl)	! Squares of wave speeds	(input)
-	real	thk(nl)	! Layer thicknesses		(input)
+	real	v(MAXLAY)	! Layer wave speeds		(input)
+	real	vsq(MAXLAY)	! Squares of wave speeds	(input)
+	real	thk(MAXLAY)	! Layer thicknesses		(input)
 	integer	jl	! Event layer			(input)
 	real	tkj	! Event depth within layer jl	(input)
 	real	delta	! Epicentral distance		(input)

@@ -1,4 +1,4 @@
-function[]=eqplot
+function[]=eqplot 			% version 1.1 - 10/2004 - fw
 % Matlab script to read and display hypoDD output files 
 % (hypoDD.loc, hypoDDD.reloc, and hypoDD.sta)
 %
@@ -88,8 +88,8 @@ plot(lon,lat,'o','markersize',2,'color','r');
 plot(slon,slat,'v','markersize',2); 
 for i=1:length(slon); text(slon(i),slat(i),sta(i,:),'fontsize',8);end
 axis('equal');box('on');
-axis([min([slon lon']) max([slon lon']) min([slat lat']) max([slat lat'])]); 
-title('STATION MAP'); xlabel('longitude'); ylabel('latitude'); 
+axis([min([slon lon']) max([slon lon']) min([slat lat']) max([slat lat'])]);
+title('STATION MAP'); xlabel('longitude'); ylabel('latitude');
 
 %--- PLOT EVENTS (map view)
 subplot(2,2,2);hold on
@@ -125,7 +125,7 @@ if(err== 1); for i=1:length(x0)
 	plot([(x0(i)*cos(phiA)-y0(i)*sin(phiA)-ex0(i)) (x0(i)*cos(phiA)-y0(i)*sin(phiA)+ex0(i))],[z0(i) z0(i)],'color','r');
 	plot([(x0(i)*cos(phiA)-y0(i)*sin(phiA)) (x0(i)*cos(phiA)-y0(i)*sin(phiA))],[z0(i)-ez0(i) z0(i)+ez0(i)],'color','r'); end;end
 if(length(id)>0); for i=1:length(x0);hold on
-	for k=1:length(id); if(id(k)==cusp(i)); 
+        for k=1:length(id); if(id(k)==cusp0(i));
 		plot((x0(i)*cos(phiA)-y0(i)*sin(phiA)),z0(i),'o','markersize',10,'color','g'); end;end
 end;end
 plot((x0(find(mag0>minmag))*cos(phiA)-y0(find(mag0>minmag))*sin(phiA)),z0(find(mag0>minmag)),'o','color','r');
@@ -153,7 +153,7 @@ if(err== 1); for i=1:length(x0)
 	plot([(x0(i)*cos(phiA)-y0(i)*sin(phiA)-ex0(i)) (x0(i)*cos(phiA)-y0(i)*sin(phiA)+ex0(i))],[z0(i) z0(i)],'color','r');
 	plot([(x0(i)*cos(phiA)-y0(i)*sin(phiA)) (x0(i)*cos(phiA)-y0(i)*sin(phiA))],[z0(i)-ez0(i) z0(i)+ez0(i)],'color','r'); end;end
 if(length(id)>0); for i=1:length(x0);hold on
-	for k=1:length(id); if(id(k)==cusp(i)); 
+        for k=1:length(id); if(id(k)==cusp0(i));
 		plot((x0(i)*cos(phiA)-y0(i)*sin(phiA)),z0(i),'o','markersize',10,'color','g'); end;end
 end;end
 plot((x0(find(mag0>minmag))*cos(phiA)-y0(find(mag0>minmag))*sin(phiA)),z0(find(mag0>minmag)),'o','color','r');

@@ -56,7 +56,7 @@ c              S phase
             endif
             if (tt1.eq.0 .or. tt2.eq.0) then
                write(*,'("FATAL ERROR (theor tt). Please report to ",
-     &                   "felix@andreas.wr.usgs.gov")')
+     &                   "felixw@ldeo.columbia.edu")')
                stop
             endif
             dt_cal(i) = tt1 - tt2

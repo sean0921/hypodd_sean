@@ -1,13 +1,14 @@
 	subroutine lsfit_lsqr(log, iter, ndt, nev, nsrc,
      &	damp, mod_ratio,
-     &	idata, ev_cusp, src_cusp,
+     &	idata, ev_cusp, src_cusp,ev_fix,
      &	dt_res, dt_wt,
      &	dt_ista, dt_ic1, dt_ic2,
      &	src_dx, src_dy, src_dz, src_dt, src_ex, src_ey, src_ez, src_et,
      &	exav, eyav, ezav, etav, dxav, dyav, dzav, dtav,
      &	rms_cc, rms_ct, rms_cc0, rms_ct0,
      &	rms_ccold, rms_ctold, rms_cc0old, rms_ct0old,
-     &	tmp_xp, tmp_yp, tmp_zp, dt_idx, acond)
+     &	tmp_xp, tmp_yp, tmp_zp,
+     &	tmp_xs, tmp_ys, tmp_zs, dt_idx, acond)
 
 	implicit none
 
@@ -20,9 +21,11 @@ c	Parameters:
 	integer		nev
 	integer		nsrc
 	real		damp
-	real		mod_ratio
+c	real		mod_ratio
+	real		mod_ratio(MAXLAY)
 	integer		idata
 	integer		ev_cusp(MAXEVE)	! [1..nev] Event keys
+        integer         ev_fix(MAXEVE)  ! [1..nev]
 	integer		src_cusp(MAXEVE)! [1..nev] Event keys
 	real		dt_res(MAXDATA)	! [1..ndt]
 	real		dt_wt(MAXDATA)	! [1..ndt]
@@ -52,6 +55,9 @@ c	Parameters:
 	real		tmp_xp(MAXSTA,MAXEVE)! [1.., 1..nev]
 	real		tmp_yp(MAXSTA,MAXEVE)! [1.., 1..nev]
 	real		tmp_zp(MAXSTA,MAXEVE)! [1.., 1..nev]
+	real		tmp_xs(MAXSTA,MAXEVE)! [1.., 1..nev]
+	real		tmp_ys(MAXSTA,MAXEVE)! [1.., 1..nev]
+	real		tmp_zs(MAXSTA,MAXEVE)! [1.., 1..nev]
 	integer		dt_idx(MAXDATA)	! [1..ndt]
 	real		acond		! Condition number
 
@@ -84,6 +90,8 @@ c	Local variables:
 	integer		n
 	integer		nar
 	integer		nndt
+	integer		nrw	
+	integer		k	
 	real		norm(MAXEVE*4)
 	real		norm_test(MAXEVE*4)
 	real		resvar1
@@ -102,10 +110,36 @@ c	Local variables:
 	real		xnorm
 
       write(log,'(/,"~ setting up G matrix.. ")')
+      write(log,*)"     ndt, nev, nsrc, damp: ",ndt, nev, nsrc, damp
 
-c     If mean shift not contstrained
-      nar = 8*ndt
-      nndt = ndt
+cc     If mean shift not contstrained
+c      nar = 8*ndt
+c      nndt = ndt
+
+      nndt= ndt         ! current length of d (diff time) vector
+      nrw=  8*ndt       ! current length of rw (partial deriv) vector
+
+c-- Define end length of rw vector here:
+      nar = 8*ndt       ! If mean shift not contstrained
+c      nar= nar+4*nev   ! If mean shift contstrained (four extra rows)
+
+c determine how many entries are needed to constrain selected hypocentral
+c parameters:
+      do i=1,nev
+         if(ev_fix(i).eq.1) then        !z
+            nar= nar+ 1
+         elseif(ev_fix(i).eq.2) then    !z,t
+            nar= nar+ 2
+         elseif(ev_fix(i).eq.3) then    !x,y,z
+            nar= nar+ 3
+         elseif(ev_fix(i).eq.4) then    !x,y,z,t
+            nar= nar+ 4
+         elseif(ev_fix(i).eq.5) then    !t
+            nar= nar+ 1
+         elseif(ev_fix(i).eq.6) then    !x,y
+            nar= nar+ 2
+         endif
+      enddo
 
       iw(1) = nar
 
@@ -119,6 +153,8 @@ c        Weight data first
             wtinv(i) = 1.0
          endif
          d(i) = dt_res(i)*1000.0 * wt(i)
+
+c        Set up column indexes with non-zero elements
          iw(1+i) = i
          iw(1+ndt+i) = i
          iw(1+2*ndt+i) = i
@@ -137,13 +173,19 @@ c        Set up non-zero G matrix elements and apply weights
             k2 = dt_ic2(i)
          endif
          if (dt_idx(i).eq.2 .or. dt_idx(i).eq.4) then
-            rw(i)       = tmp_xp(dt_ista(i),k1) * wt(i) * mod_ratio
-            rw(ndt+i)   = tmp_yp(dt_ista(i),k1) * wt(i) * mod_ratio
-            rw(2*ndt+i) = tmp_zp(dt_ista(i),k1) * wt(i) * mod_ratio
+c            rw(i)       = tmp_xp(dt_ista(i),k1) * wt(i) * mod_ratio
+c            rw(ndt+i)   = tmp_yp(dt_ista(i),k1) * wt(i) * mod_ratio
+c            rw(2*ndt+i) = tmp_zp(dt_ista(i),k1) * wt(i) * mod_ratio
+            rw(i)       = tmp_xs(dt_ista(i),k1) * wt(i) 
+            rw(ndt+i)   = tmp_ys(dt_ista(i),k1) * wt(i) 
+            rw(2*ndt+i) = tmp_zs(dt_ista(i),k1) * wt(i) 
             rw(3*ndt+i) = wt(i)
-            rw(4*ndt+i) = -tmp_xp(dt_ista(i),k2) * wt(i) * mod_ratio
-            rw(5*ndt+i) = -tmp_yp(dt_ista(i),k2) * wt(i) * mod_ratio
-            rw(6*ndt+i) = -tmp_zp(dt_ista(i),k2) * wt(i) * mod_ratio
+c            rw(4*ndt+i) = -tmp_xp(dt_ista(i),k2) * wt(i) * mod_ratio
+c            rw(5*ndt+i) = -tmp_yp(dt_ista(i),k2) * wt(i) * mod_ratio
+c            rw(6*ndt+i) = -tmp_zp(dt_ista(i),k2) * wt(i) * mod_ratio
+            rw(4*ndt+i) = -tmp_xs(dt_ista(i),k2) * wt(i) 
+            rw(5*ndt+i) = -tmp_ys(dt_ista(i),k2) * wt(i) 
+            rw(6*ndt+i) = -tmp_zs(dt_ista(i),k2) * wt(i) 
             rw(7*ndt+i) = -wt(i)
          else
             rw(i)       = tmp_xp(dt_ista(i),k1) * wt(i)
@@ -167,6 +209,110 @@ c        Set up column indexes with non-zero elements
          iw(1+nar+7*ndt+i) = 4*dt_ic2(i)
 
       enddo
+      nrw= 8*ndt        !current length of rw vector 
+
+c--- add four extra rows to make mean shift zero
+c  if this is activ, set nar and nndt at the beginning for this routine to
+c  proper values!!!!
+c      do i=1,4
+c         d(ndt+i)= 0                   ! zero shift
+c         wt(ndt+i)= 1                  ! weight for the constraint
+c         wtinv(ndt+i)= 1/wt(ndt+i)
+c         do j=1,nev
+c            iw(1 + nrw +(i-1)*nev+j)= ndt +i 
+c            iw(1 + nar + nrw +(i-1)*nev+j)= (i-1) + j*4-3
+c            rw(nrw + (i-1)*nev+j)= 10
+c         enddo
+c      enddo
+c      nrw= nrw+4*nev
+c      nndt= nndt+4
+
+c THIS HAS NOT BEEN TESTED!!!
+c     Add extra rows to constrain parameters according to ev_fix value.
+      k= 1
+      do i=1,nev
+         if(ev_fix(i).ne.0) then
+cc	    stop'ev_fix >0 in lsqr runs not tested. Do not use.'
+            if(ev_fix(i).eq.1) then			! z fix
+               d(nndt+k) = 0.0
+               iw(1+ nrw + k)= nndt + k 
+               iw(1+ nar + nrw + k)= 4*i-1 
+               rw(nrw +k) = 100.0 			! weight here!!
+c               write(*,*)nndt + k,4*ev_ic(i)-1,dt_ic1(1),dt_ic2(1)
+               k= k+1
+            elseif(ev_fix(i).eq.2) then	! z,t fix 
+               d(nndt+k) = 0.0
+               iw(1+ nrw + k)= nndt + k 
+               iw(1+ nar + nrw + k)= 4*i-1 	! z fix
+               rw(nrw +k) = 100.0 			! weight here!!
+               k= k+1
+               d(nndt+k) = 0.0
+               iw(1+ nrw + k)= nndt + k 
+               iw(1+ nar + nrw + k)= 4*i 	! t fix
+               rw(nrw +k) = 100.0 			! weight here!!
+               k= k+1
+            elseif(ev_fix(i).eq.3) then			! x,y,z fix 
+               d(nndt+k) = 0.0
+               iw(1+ nrw + k)= nndt + k 
+               iw(1+ nar + nrw + k)= 4*i-3 	! x fix
+cfwrt               rw(nrw +k) = 100.0 			! weight here!!
+               rw(nrw +k) = 10.0 			! weight here!!
+               k= k+1
+               d(nndt+k) = 0.0
+               iw(1+ nrw + k)= nndt + k 
+               iw(1+ nar + nrw + k)= 4*i-2 	! y fix
+cfwrt               rw(nrw +k) = 100.0 			! weight here!!
+               rw(nrw +k) = 10.0 			! weight here!!
+               k= k+1
+               d(nndt+k) = 0.0
+               iw(1+ nrw + k)= nndt + k 
+               iw(1+ nar + nrw + k)= 4*i-1 	! z fix
+cfwrt               rw(nrw +k) = 100.0 			! weight here!!
+               rw(nrw +k) = 10.0 			! weight here!!
+               k= k+1
+            elseif(ev_fix(i).eq.4) then			! x,y,z,t fix 
+               d(nndt+k) = 0.0
+               iw(1+ nrw + k)= nndt + k 
+               iw(1+ nar + nrw + k)= 4*i-3 	! x fix
+               rw(nrw +k) = 100.0 			! weight here!!
+               k= k+1
+               d(nndt+k) = 0.0
+               iw(1+ nrw + k)= nndt + k 
+               iw(1+ nar + nrw + k)= 4*i-2 	! y fix
+               rw(nrw +k) = 100.0 			! weight here!!
+               k= k+1
+               d(nndt+k) = 0.0
+               iw(1+ nrw + k)= nndt + k 
+               iw(1+ nar + nrw + k)= 4*i-1 	! z fix
+               rw(nrw +k) = 100.0 			! weight here!!
+               k= k+1
+               d(nndt+k) = 0.0
+               iw(1+ nrw + k)= nndt + k 
+               iw(1+ nar + nrw + k)= 4*i 	! t fix
+               rw(nrw +k) = 100.0 			! weight here!!
+               k= k+1
+            elseif(ev_fix(i).eq.5) then	! t fix 
+               d(nndt+k) = 0.0
+               iw(1+ nrw + k)= nndt + k 
+               iw(1+ nar + nrw + k)= 4*i 	! t fix
+               rw(nrw +k) = 1000.0 			! weight here!!
+               k= k+1
+            elseif(ev_fix(i).eq.6) then	! x,y fix 
+               d(nndt+k) = 0.0
+               iw(1+ nrw + k)= nndt + k 
+               iw(1+ nar + nrw + k)= 4*i-3 	! x fix
+               rw(nrw +k) = 100.0 			! weight here!!
+               k= k+1
+               d(nndt+k) = 0.0
+               iw(1+ nrw + k)= nndt + k 
+               iw(1+ nar + nrw + k)= 4*i-2 	! y fix
+               rw(nrw +k) = 100.0 			! weight here!!
+               k= k+1
+            endif
+         endif
+      enddo
+      nrw= nrw + k-1
+      if(nrw.ne.nar)stop'FATAL ERROR (lsfit_lsqr): nrw != nar'
 
 c     Scale G matrix so the L2 norm of each column is 1.
       write(log,'("~ scaling G columns ... ")')
@@ -196,7 +342,7 @@ c     Testing...
          norm_test(i) = sqrt(norm_test(i)/nndt)
          if (abs(norm_test(i)-1).gt.0.001) then
             write(*,'("FATAL ERROR (lsqr: G scaling). Please report to ",   
-     &                "felix@andreas.wr.usgs.gov")')
+     &                "felixw@ldeo.columbia.edu")')
             stop
          endif
       enddo

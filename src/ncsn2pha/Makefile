@@ -1,13 +1,16 @@
 CMD	= ncsn2pha
 CC	= gcc
-FC	= g77
+#FC	= g77
 #FC	= f77
+FC	= gfortran 
 SRCS	= $(CMD).f
 CSRCS	= 
 OBJS	= $(SRCS:%.f=%.o) $(CSRCS:%.c=%.o)
 CFLAGS	= -O
 #FFLAGS  = -O -fno-silent -Wall -implicit
 FFLAGS	= -O
+
+LDFLAGS = -L/usr/lib/gcc/i686-apple-darwin10/4.2.1 -lgcc
 
 all: $(CMD)
 

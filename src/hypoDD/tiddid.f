@@ -12,8 +12,8 @@ c	Parameters:
 	real	v(MAXLAY)	! (1..nl)
 	real	vsq(MAXLAY)	! (1..nl)
 	real	thk(MAXLAY)	! (1..nl)
-	real	tid(20)	! (1..20)
-	real	did(20)	! (1..20)
+	real	tid(MAXLAY)	! (1..20)
+	real	did(MAXLAY)	! (1..20)
 
 c       Determines the travel time intercept and critical
 c  distance for a seismic ray in a layered earth model

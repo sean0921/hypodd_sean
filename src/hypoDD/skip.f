@@ -2,16 +2,18 @@
      &	ndt, nev, nsrc, nsta,
      &	ev_cusp, ev_date, ev_time, ev_mag,
      &	ev_lat, ev_lon, ev_dep, ev_x, ev_y, ev_z,
-     &	ev_herr, ev_zerr, ev_res,
+     &	ev_herr, ev_zerr, ev_res, ev_fix,
      &	src_cusp, src_lat, src_lon, src_dep,
      &	src_lat0, src_lon0,
      &	src_x, src_y, src_z, src_t, src_x0, src_y0, src_z0, src_t0,
-     &	sta_lab, sta_lat, sta_lon, sta_dist, sta_az,
+     &	sta_lab, sta_lat, sta_lon, sta_elv, sta_mod, sta_dist, sta_az,
      &	sta_rmsc, sta_rmsn, sta_np, sta_ns, sta_nnp, sta_nns,
      &	dt_sta, dt_c1, dt_c2, dt_idx, dt_dt, dt_qual, dt_cal,
      &	dt_ista, dt_ic1, dt_ic2,
      &	dt_res, dt_wt, dt_offs,
-     &	tmp_ttp, tmp_tts, tmp_xp, tmp_yp, tmp_zp, nct, ncc)
+     &  tmp_ttp,tmp_tts,tmp_xp,tmp_yp,tmp_zp,tmp_xs,tmp_ys,tmp_zs,
+     &  nct,ncc)
+
 
 	implicit none
 
@@ -38,6 +40,7 @@ c	Parameters:
 	real		ev_herr(MAXEVE)	! [1..MAXEVE]
 	real		ev_zerr(MAXEVE)	! [1..MAXEVE]
 	real		ev_res(MAXEVE)	! [1..MAXEVE]
+        integer         ev_fix(MAXEVE)  ! [1..MAXEVE]
 	integer		src_cusp(MAXEVE)! [1..MAXEVE]
 	doubleprecision	src_lat(MAXEVE)	! [1..MAXEVE]
 	doubleprecision	src_lon(MAXEVE)	! [1..MAXEVE]
@@ -55,6 +58,8 @@ c	Parameters:
 	character	sta_lab(MAXSTA)*7! [1..MAXSTA]
 	real		sta_lat(MAXSTA)	! [1..MAXSTA]
 	real		sta_lon(MAXSTA)	! [1..MAXSTA]
+	real		sta_elv(MAXSTA)	! [1..MAXSTA]
+	integer		sta_mod(MAXSTA)	! [1..MAXSTA]
 	real		sta_dist(MAXSTA)! [1..MAXSTA]
 	real		sta_az(MAXSTA)	! [1..MAXSTA]
 	real		sta_rmsc(MAXSTA)! [1..MAXSTA]
@@ -81,6 +86,9 @@ c	Parameters:
 	real		tmp_xp(MAXSTA,MAXEVE)! [1..MAXSTA,1..MAXEVE]
 	real		tmp_yp(MAXSTA,MAXEVE)! [1..MAXSTA,1..MAXEVE]
 	real		tmp_zp(MAXSTA,MAXEVE)! [1..MAXSTA,1..MAXEVE]
+	real		tmp_xs(MAXSTA,MAXEVE)! [1..MAXSTA,1..MAXEVE]
+	real		tmp_ys(MAXSTA,MAXEVE)! [1..MAXSTA,1..MAXEVE]
+	real		tmp_zs(MAXSTA,MAXEVE)! [1..MAXSTA,1..MAXEVE]
 	integer		nct
 	integer		ncc
 
@@ -163,6 +171,7 @@ c     Skip events
             ev_herr(k) = ev_herr(i)
             ev_zerr(k) = ev_zerr(i)
             ev_res(k) = ev_res(i)
+            ev_fix(k) = ev_fix(i)
             ev_x(k) = ev_x(i)
             ev_y(k) = ev_y(i)
             ev_z(k) = ev_z(i)
@@ -199,6 +208,9 @@ c     Uses sorted dt_ic[12] arrays from above
                   tmp_xp(j,k) = tmp_xp(j,i)
                   tmp_yp(j,k) = tmp_yp(j,i)
                   tmp_zp(j,k) = tmp_zp(j,i)
+                  tmp_xs(j,k) = tmp_xs(j,i)
+                  tmp_ys(j,k) = tmp_ys(j,i)
+                  tmp_zs(j,k) = tmp_zs(j,i)
                enddo
                k = k+1
             endif
@@ -225,6 +237,8 @@ c    Clean stations
             sta_lab(k) = sta_lab(i)
             sta_lat(k) = sta_lat(i)
             sta_lon(k) = sta_lon(i)
+            sta_elv(k) = sta_elv(i)
+            sta_mod(k) = sta_mod(i)
             sta_dist(k) = sta_dist(i)
             sta_az(k) = sta_az(i)
             sta_np(k) = sta_np(i)
@@ -239,6 +253,9 @@ c    Clean stations
                tmp_xp(k,j) = tmp_xp(i,j)
                tmp_yp(k,j) = tmp_yp(i,j)
                tmp_zp(k,j) = tmp_zp(i,j)
+               tmp_xs(k,j) = tmp_xs(i,j)
+               tmp_ys(k,j) = tmp_ys(i,j)
+               tmp_zs(k,j) = tmp_zs(i,j)
             enddo
             k = k+1
          endif
@@ -261,7 +278,7 @@ c     Index station labels and cuspids
             endif
          enddo
          write(*,'("FATAL ERROR (indexing). Please report to ",
-     &             "felix@andreas.wr.usgs.gov")')
+     &             "felixw@ldeo.columbia.edu")')
          stop   
 300      continue
       enddo

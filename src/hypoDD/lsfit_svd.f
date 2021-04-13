@@ -1,12 +1,13 @@
 	subroutine lsfit_svd(log, iter, ndt, nev, nsrc, damp, mod_ratio,
-     &	idata, ev_cusp, src_cusp,
+     &	idata, ev_cusp, src_cusp,ev_fix,
      &	dt_res, dt_wt,
      &	dt_ista, dt_ic1, dt_ic2,   
      &	src_dx, src_dy, src_dz, src_dt, src_ex, src_ey, src_ez, src_et,
      &	exav, eyav, ezav, etav, dxav, dyav, dzav, dtav,
      &	rms_cc, rms_ct, rms_cc0, rms_ct0,
      &	rms_ccold, rms_ctold, rms_cc0old, rms_ct0old,
-     &	tmp_xp, tmp_yp, tmp_zp, dt_idx)
+     &	tmp_xp, tmp_yp, tmp_zp,
+     &	tmp_xs, tmp_ys, tmp_zs, dt_idx)
 
 	implicit none
 
@@ -19,9 +20,11 @@ c	Parameters:
 	integer		nev
 	integer		nsrc
 	real		damp
-	real		mod_ratio
+c	real		mod_ratio
+	real		mod_ratio(MAXLAY)
 	integer		idata
 	integer		ev_cusp(MAXEVE)	! (1..MAXEVE)
+        integer         ev_fix(MAXEVE)  ! (1..MAXEVE)
 	integer		src_cusp(MAXEVE)	! (1..MAXEVE)
 	real		dt_res(MAXDATA)	! (1..MAXDATA)
 	real		dt_wt(MAXDATA)	! (1..MAXDATA)
@@ -55,6 +58,9 @@ c	Parameters:
 	real		tmp_xp(MAXSTA,MAXEVE)! (1..maxsta, 1..MAXEVE)
 	real		tmp_yp(MAXSTA,MAXEVE)! (1..maxsta, 1..MAXEVE)
 	real		tmp_zp(MAXSTA,MAXEVE)! (1..maxsta, 1..MAXEVE)
+	real		tmp_xs(MAXSTA,MAXEVE)! (1..maxsta, 1..MAXEVE)
+	real		tmp_ys(MAXSTA,MAXEVE)! (1..maxsta, 1..MAXEVE)
+	real		tmp_zs(MAXSTA,MAXEVE)! (1..maxsta, 1..MAXEVE)
 	integer		dt_idx(MAXDATA)	! (1..MAXDATA)
 
 c	Local	variables:
@@ -65,7 +71,7 @@ c	Local	variables:
 	real		exavold, eyavold, ezavold, etavold
 	real		factor
 	doubleprecision		g(MAXDATA0,MAXEVE0*4)
-	integer		i, j
+	integer		i, j, k
 	integer		izero
 	integer		k1, k2
 	integer		nndt
@@ -103,13 +109,19 @@ c     Set up full G matrix
             k2 = dt_ic2(i)
          endif
          if (dt_idx(i).eq.2 .or. dt_idx(i).eq.4) then
-           g(i,dt_ic1(i)*4-3) = tmp_xp(dt_ista(i),k1)*mod_ratio
-           g(i,dt_ic1(i)*4-2) = tmp_yp(dt_ista(i),k1)*mod_ratio
-           g(i,dt_ic1(i)*4-1) = tmp_zp(dt_ista(i),k1)*mod_ratio
+c           g(i,dt_ic1(i)*4-3) = tmp_xp(dt_ista(i),k1)*mod_ratio
+c           g(i,dt_ic1(i)*4-2) = tmp_yp(dt_ista(i),k1)*mod_ratio
+c           g(i,dt_ic1(i)*4-1) = tmp_zp(dt_ista(i),k1)*mod_ratio
+           g(i,dt_ic1(i)*4-3) = tmp_xs(dt_ista(i),k1)
+           g(i,dt_ic1(i)*4-2) = tmp_ys(dt_ista(i),k1)
+           g(i,dt_ic1(i)*4-1) = tmp_zs(dt_ista(i),k1)
            g(i,dt_ic1(i)*4) = 1.0
-           g(i,dt_ic2(i)*4-3) = -tmp_xp(dt_ista(i),k2)*mod_ratio
-           g(i,dt_ic2(i)*4-2) = -tmp_yp(dt_ista(i),k2)*mod_ratio
-           g(i,dt_ic2(i)*4-1) = -tmp_zp(dt_ista(i),k2)*mod_ratio
+c           g(i,dt_ic2(i)*4-3) = -tmp_xp(dt_ista(i),k2)*mod_ratio
+c           g(i,dt_ic2(i)*4-2) = -tmp_yp(dt_ista(i),k2)*mod_ratio
+c           g(i,dt_ic2(i)*4-1) = -tmp_zp(dt_ista(i),k2)*mod_ratio
+           g(i,dt_ic2(i)*4-3) = -tmp_xs(dt_ista(i),k2)
+           g(i,dt_ic2(i)*4-2) = -tmp_ys(dt_ista(i),k2)
+           g(i,dt_ic2(i)*4-1) = -tmp_zs(dt_ista(i),k2)
            g(i,dt_ic2(i)*4) = -1.0
          else
            g(i,dt_ic1(i)*4-3) = tmp_xp(dt_ista(i),k1)
@@ -122,6 +134,7 @@ c     Set up full G matrix
            g(i,dt_ic2(i)*4) = -1.0
          endif
       enddo
+
 
 c     Weight data
       do i=1,ndt
@@ -143,15 +156,130 @@ c     Add four extra rows to make mean shift zero.
 c     This should make the design matrix non-singular.
       do i=1,4
          d(ndt+i) = 0.0
-         wt(ndt+i) = 1.0
+c         wt(ndt+i) = 1.0
          do j=1,nev
-            g(ndt+i,j*4-4+i) = 1.0
-            g(ndt+i,j*4-3+i) = 0.0
-            g(ndt+i,j*4-2+i) = 0.0
-            g(ndt+i,j*4-1+i) = 0.0
+c            g(ndt+i,j*4-4+i) = 1.0
+c            g(ndt+i,j*4-3+i) = 0.0
+c            g(ndt+i,j*4-2+i) = 0.0
+c            g(ndt+i,j*4-1+i) = 0.0
+            g(ndt+i,j*4-3) = 0.0
+            g(ndt+i,j*4-2) = 0.0
+            g(ndt+i,j*4-1) = 0.0
+            g(ndt+i,j*4) = 0.0
+            g(ndt+i,j*4-4+i) = 1.0      ! here is the weight!!
          enddo
       enddo
       nndt = ndt+4
+      write(log,'(a)')'  extra rows added to make mean shift zero: 4'
+
+c     add extra rows to constrain parameters according to ev_fix value.
+      k= 1
+      do i=1,nev
+         if(ev_fix(i).ne.0) then
+            if(ev_fix(i).eq.1) then	! z fix
+               d(nndt+k) = 0.0
+               do j=1,nev*4
+                  g(nndt+k,j) = 0
+               enddo
+cfwrt               g(nndt+k,i*4-1) = 100.0 	! weight here!!
+               g(nndt+k,i*4-1) = damp 	! weight here!! 
+               k= k+1
+            elseif(ev_fix(i).eq.2) then	! z,t fix 
+               d(nndt+k) = 0.0
+               do j=1,nev*4
+                  g(nndt+k,j) = 0
+               enddo
+cfwrt               g(nndt+k,i*4-1) = 100.0 	! weight here!!  z
+               g(nndt+k,i*4-1) = damp 	! weight here!!  z
+               k= k+1
+               d(nndt+k) = 0.0
+               do j=1,nev*4
+                  g(nndt+k,j) = 0
+               enddo
+cfwrt               g(nndt+k,i*4) = 100.0 	! weight here!!  t
+               g(nndt+k,i*4) = damp 	! weight here!!  t
+               k= k+1
+            elseif(ev_fix(i).eq.3) then	! x,y,z fix 
+               d(nndt+k) = 0.0
+               do j=1,nev*4
+                  g(nndt+k,j) = 0
+               enddo
+cfwrt               g(nndt+k,i*4-3) = 100.0 	! weight here!!  x
+               g(nndt+k,i*4-3) = damp 	! weight here!!  x
+               k= k+1
+               d(nndt+k) = 0.0
+               do j=1,nev*4
+                  g(nndt+k,j) = 0
+               enddo
+cfwrt               g(nndt+k,i*4-2) = 100.0 	! weight here!!  y
+               g(nndt+k,i*4-2) = damp 	! weight here!!  y
+               k= k+1
+               d(nndt+k) = 0.0
+               do j=1,nev*4
+                  g(nndt+k,j) = 0
+               enddo
+cfwrt               g(nndt+k,i*4-1) = 100.0 	! weight here!!  z
+               g(nndt+k,i*4-1) = damp 	! weight here!!  z
+               k= k+1
+            elseif(ev_fix(i).eq.4) then	! x,y,z,t fix 
+               d(nndt+k) = 0.0
+               do j=1,nev*4
+                  g(nndt+k,j) = 0
+               enddo
+cfwrt               g(nndt+k,i*4-3) = 100.0 	! weight here!!  x
+               g(nndt+k,i*4-3) = damp 	! weight here!!  x
+               k= k+1
+               d(nndt+k) = 0.0
+               do j=1,nev*4
+                  g(nndt+k,j) = 0
+               enddo
+cfwrt               g(nndt+k,i*4-2) = 100.0 	! weight here!!  y
+               g(nndt+k,i*4-2) = damp 	! weight here!!  y
+               k= k+1
+               d(nndt+k) = 0.0
+               do j=1,nev*4
+                  g(nndt+k,j) = 0
+               enddo
+cfwrt               g(nndt+k,i*4-1) = 100.0 	! weight here!!  z
+               g(nndt+k,i*4-1) = damp 	! weight here!!  z
+               k= k+1
+               d(nndt+k) = 0.0
+               do j=1,nev*4
+                  g(nndt+k,j) = 0
+               enddo
+cfwrt               g(nndt+k,i*4) = 100.0 	! weight here!!  t
+               g(nndt+k,i*4) = damp 	! weight here!!  t
+               k= k+1
+            elseif(ev_fix(i).eq.5) then	! t fix 
+               d(nndt+k) = 0.0
+               do j=1,nev*4
+                  g(nndt+k,j) = 0
+               enddo
+cfwrt               g(nndt+k,i*4) = 100.0 	! weight here!!  t
+               g(nndt+k,i*4) = damp 	! weight here!!  t
+               k= k+1
+            elseif(ev_fix(i).eq.6) then	! x, y fix 
+               d(nndt+k) = 0.0
+               do j=1,nev*4
+                  g(nndt+k,j) = 0
+               enddo
+cfwrt               g(nndt+k,i*4-3) = 100.0 	! weight here!!  x
+               g(nndt+k,i*4-3) = damp 	! weight here!!  x
+               k= k+1
+               d(nndt+k) = 0.0
+               do j=1,nev*4
+                  g(nndt+k,j) = 0
+               enddo
+cfwrt               g(nndt+k,i*4-2) = 100.0 	! weight here!!  y
+               g(nndt+k,i*4-2) = damp 	! weight here!!  y
+               k= k+1
+            endif
+         endif
+      enddo
+      nndt = nndt+k-1
+      write(log,'(a,i8)')
+     & '  extra rows added to constrain selected parameters: ',k-1
+
 
 c     Column scaling
       do j=1,4*nev
@@ -184,7 +312,7 @@ c     Testing...
          norm_test(j) = sqrt(norm_test(j)/nndt)
          if (abs(norm_test(j)-1).gt.0.001) then
             write(*,'("FATAL ERROR (svd: G scaling). Please report to ",
-     &                "felix@andreas.wr.usgs.gov")')
+     &                "felixw@ldeo.columbia.edu")')
             stop
          endif
       enddo

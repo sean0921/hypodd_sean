@@ -7,13 +7,7 @@ c MOBS:  Max number of phases (P&S) per eventer event.
 
 	integer	MEV, MSTA, MOBS
 
-c mediuam size problem
-c	parameter(MEV=    32000,    
-	parameter(MEV=    16000,    
+	parameter(MEV=    12000,    
      &		MSTA=   2400,		
-     &		MOBS=   500)
+     &		MOBS=   600)
 
-cc large size problem
-c	parameter(MEV=    44800,    
-c     &	 	MSTA=   830,		
-c     &		MOBS=   500)

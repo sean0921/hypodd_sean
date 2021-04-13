@@ -9,7 +9,8 @@ c--Fred Klein 2/2001
 c--read a line, then decode it
 2	read (5,'(a)',end=9) line
 	read (line,1000,iostat=ios) site,net, latd,xlat,clat, 
-	2 lond,xlon,clon
+c111109     	2 lond,xlon,clon
+     2  lond,xlon,clon
 	
 1000	format (a5,1x,a2,7x, i2,1x,f7.4,a1, i3,1x,f7.4,a1)
 	

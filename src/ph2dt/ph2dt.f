@@ -1,31 +1,52 @@
        program ph2dt
 
-c Version 1.3 - 08/2010  same as 1.2, but now compiles with gfortran
-c                         (rcs removed)
-c Version 1.2 - 07/2010
-c Version 1.1 - 10/2004
-c Author: Felix Waldhauser, felixw@ldeo.columbia.edu
-c
-c started 03/1999
-c 01-03/2001  clean up & bug fixes by Bruce Julian, Fred Klein, Keith
-c             Richards-Dinger, Felix Waldhauser 
-c 10/2004     Version 1.1: fixed errors listed in BugList to V 1.0.
-c 05/2005     accomodate format for neg magnitudes 
-c 07/2010     version 1.2
-c 08/2010     now compiles with gfortran  (rcs removed and mod problem fixed)
-c 08/2010     version 1.3 
-c
-c Purpose:
+c AUTHOR: Felix Waldhauser, felixw@ldeo.columbia.edu
+c         Lamont-Doherty Earth Observatory, Columbia University
+
+c VERSION: 2.1b  -  08/2012  
+
+c PURPOSE:
 c Reads and filters absolute travel-time data from network catalogs
 c to form travel-time data for pairs of earthquakes. Control file or
-c interactive input of parameters to optimize linkage between events 
+c interactive input of parameters to optimize linkage between events
 c (i.e. optimize quality and minimize number of links between events).
 c See hypoDD user guide for information on how to use ph2dt.
 
+c REFERENCES:
 c For a user guide to ph2dt see USGS open-file report:
 c    Waldhauser, F., HypoDD: A computer program to compute double-difference
 c    earthquake locations,  U.S. Geol. Surv. open-file report , 01-113,
 c    Menlo Park, California, 2001.
+
+c For a description of the algorithm see:
+c    Waldhauser, F. and W.L. Ellsworth, A double-difference earthquake
+c    location algorithm: Method and application to the northern Hayward
+c    fault, Bull. Seismol. Soc. Am., 90, 1353-1368, 2000.
+
+c UPDATES:
+c This and the main hypoDD codes are continuously being updated and improved. 
+c so feel free to send me an occasional request for the newest version:
+c felixw@ldeo.columbia.edu
+c or goto http://www.ldeo.columbia.edu/~felixw/hypoDD.html
+
+c VERSION HISTORY:
+c Version 1.3  - 08/2010  same as 1.2, but now compiles with gfortran
+c                         (rcs removed)
+c Version 1.2  - 07/2010
+c Version 1.1  - 10/2004
+
+c LOG OF CHANGES:
+c 2012/08/21  change mag format from f3.1 to f5.2 
+c 2011/11/10  array declaration error in p_sta fixed. 
+c 05/2011     handle station elevation, output station.sel, version 2.0b
+c 08/2010     version 1.3
+c 08/2010     now compiles with gfortran  (rcs removed and mod problem fixed)
+c 07/2010     version 1.2
+c 05/2005     accomodate format for neg magnitudes
+c 10/2004     Version 1.1: fixed errors listed in BugList to V 1.0.
+c 03/2001     Version 1.0
+c 03/2001     clean up & bug fixes by Waldhauser, Julian, Klein, Richards-Dinger
+c started 03/1999
 c
 
 c--Reads the input file specified om the command line (ph2dt ph2dt.inp)
@@ -64,7 +85,7 @@ c See hypoDD user guide for a description of the parameters.
 	real		aoffs(MEV)
 	real		a_time1(MOBS)
 	real		a_time2(MOBS)
-	doubleprecision	atoangle	! ASCII-to-angle function
+c	doubleprecision	atoangle	! ASCII-to-angle function
 	real		avoff
 	real		avoff_str
 	real		maxoff_str
@@ -76,6 +97,7 @@ c See hypoDD user guide for a description of the parameters.
 	real		b_time2(MOBS)
 	character	buf1*20		! Input buffer
 	character	buf2*20		! Input buffer
+	character	buf3*20		! Input buffer
 	real		b_wtr(MOBS)
 	integer		cuspid(MEV)
 	integer		date(MEV)
@@ -151,7 +173,10 @@ c See hypoDD user guide for a description of the parameters.
 	real		sec(MEV)
 	real		s_lat(MSTA)
 	real		s_lon(MSTA)
-	integer		sscanf3		! String-reading function
+        real            s_elv(MSTA)
+        integer         aista(MSTA)     ! idx to selected stations
+c	integer		sscanf3		! String-reading function
+c	integer		sscanf4		! String-reading function
 	integer		trimlen
 	real		vel
 	real		verr
@@ -168,7 +193,8 @@ c See hypoDD user guide for a description of the parameters.
 	character	fn9*80
 	character	line*180
 	character	p_pha(MEV,MOBS)*1
-	character	p_sta(MEV,MSTA)*7
+c111110	character	p_sta(MEV,MSTA)*7
+	character	p_sta(MEV,MOBS)*7
 	character	s_lab(MSTA)*7
 	character	str1*1
 	character	str30*30
@@ -177,6 +203,7 @@ c See hypoDD user guide for a description of the parameters.
 
 	parameter	(PI=3.141593)
         parameter       (KMPERDEG=111.1949266)
+
 
 c setpar:
 c--Only standard format is now supported. Conversion from other formats occurs externally
@@ -187,10 +214,10 @@ c file with cuspids to select for
 
       log= 20
       open(log,file='ph2dt.log',status='unknown')
-      str= 'starting ph2dt (v1.3 - 08/2010)...'
+      str= 'starting ph2dt (v2.1b - 08/2012)...'
       call datetime(dattim)
-      write(6,'(a40,a)') str, dattim
-      write(log,'(a40,a)') str, dattim
+      write(6,'(a40,a25)') str, dattim
+      write(log,'(a40,a25)') str, dattim
 
 c--- get input parameter file name:
       narguments = iargc()
@@ -318,6 +345,7 @@ c--- open files:
       open(12,file='dt.ct',status='unknown')
       open(14,file='event.dat',status='unknown')
       open(15,file='event.sel',status='unknown')
+      open(16,file='station.sel',status='unknown')      !fw
 
 c--- read icusp's
       ncusp= 0
@@ -345,19 +373,62 @@ c--- read stations
       i=1
 40    read(2,'(a)',end=48)line
 
-c       Split into fields separated by white space
-	if (sscanf3(line, "%s%s%s", s_lab(i), buf1, buf2) .ne. 3) then
-	  write (6,*) line
-	  stop '** Bad station line'
-	endif
+c110621 new code to read in station file:
+c     Get format:
+      if(i.eq.1) then
+         j= 0
+         do k=2,80
+           if(line(k:k).ne.' '.and.line(k-1:k-1).eq.' ') j=j+1
+         enddo
+         if(line(1:1).ne.' ') j=j+1
+      endif
+
+      if(j.eq.4) then
+         read(line,*,end=1041,err=1041)
+     &   s_lab(i),s_lat(i),s_lon(i),s_elv(i)
+      elseif(j.eq.3) then
+         read(line,*,end=1041,err=1041)
+     &   s_lab(i),s_lat(i),s_lon(i)
+         s_elv(i) = 0.0
+      else
+        write (6,*) line
+         stop '>>> Bad station line'
+      endif
+
+c110621: the follwoign appears to be compiler dependent:
+cc       Split into fields separated by white space
+c         if (sscanf4(line, "%s%s%s%s", s_lab(i), buf1, buf2,
+c     &       buf3).eq.4) then
+cc           Convert strings to numbers
+c            s_lat(i) = atoangle(buf1)
+c            s_lon(i) = atoangle(buf2)
+c            s_elv(i) = atoangle(buf3)
+cc            s_elv(i)= s_elv(i)/1000
+cc            if(s_elv(i).lt.0.and.s_elv(i).ne.-999) then
+cc               s_elv(i)=0.0
+cc               ierr=ierr+1
+cc            endif
+c         elseif (sscanf3(line, "%s%s%s", s_lab(i), buf1, buf2)
+c     &           .eq.3) then
+cc           Convert strings to numbers
+c            s_lat(i) = atoangle(buf1)
+c            s_lon(i) = atoangle(buf2)
+c         else
+cc	if (sscanf3(line, "%s%s%s", s_lab(i), buf1, buf2) .ne. 3) then
+c	  write (6,*) line
+c	  stop '** Bad station line'
+c	endif
+
 	call rpad(s_lab(i))
 
-c       Convert strings to numbers, interpreting colons, if any.
-        s_lat(i) = atoangle(buf1)
-        s_lon(i) = atoangle(buf2)
+cc       Convert strings to numbers, interpreting colons, if any.
+c        s_lat(i) = atoangle(buf1)
+c        s_lon(i) = atoangle(buf2)
+c42      if (i.gt.MSTA) stop'>>> Increase MSTA in ph2dt.inc.'
 
-42      if (i.gt.MSTA) stop'>>> Increase MSTA in ph2dt.inc.'
+        aista(i)= 0               ! default: station not in phase data
         i= i+1
+        if (i.gt.MSTA) stop'>>> Increase MSTA in ph2dt.inc.'
       goto 40
 48    continue
 
@@ -390,10 +461,8 @@ c--Inoperable code for reading other formats removed by FWK
 
 c--Fatal error on read messages, added by FWK
 1290  write (6,*) line
-      write (*,'(a)') line
       stop '** Bad earthquake line'
 1292  write (6,*) line
-      write (*,'(a)') line
       stop '** Bad phase line'
 
 c--- start standard data format
@@ -430,6 +499,7 @@ c--- processing for all formats starts here:
             if (cuspid(i).eq.icusp(k)) itake= 1
          enddo
       endif
+
 c--- event selection
 c write header to total event list file:
       write(14,612)date(i),int(rtime),lat(i),
@@ -450,10 +520,9 @@ c write event to selected event list file:
          if (i.gt.MEV) stop'>>> Increase MEV in ph2dt.inc!'
       endif
 
-cfw612   format (i8,2x,i8,2x,f8.4,2x,f9.4,2x,
-cfw     &       f9.3,2x,f3.1,2x,f6.2,2x,f6.2,2x,f5.2,1x,i10)
 612   format (i8,2x,i8,2x,f8.4,2x,f9.4,2x,
-     &       f9.3,2x,f4.1,2x,f6.2,2x,f6.2,2x,f5.2,1x,i10)
+     &       f9.3,2x,f5.2,2x,f6.2,2x,f6.2,2x,f5.2,1x,i10)
+c     &       f9.3,2x,f3.1,2x,f6.2,2x,f6.2,2x,f5.2,1x,i10)  cfw120821 neg mag
 
       if (iformat.eq.0.and.line(1:1).ne.'#') goto 200 	!no ne event
       goto 100
@@ -574,12 +643,12 @@ c remove outliers above the separation-delaytime line:
                   if(p_pha(i,j).eq.'P') vel= 4.
                   if(p_pha(i,j).eq.'S') vel= 2.3
                   if(abs(p_time(i,j)-p_time(k,l)).gt.
-     &               aoffs(indx(m))/vel + 0.5) then  
+     &               aoffs(indx(m))/vel + 0.5) then
                      write(log,'(a,a7,2i9,4f9.3)')'Outlier: ',
      & p_sta(i,j),cuspid(i),cuspid(k),aoffs(indx(m)),p_time(i,j),
      & p_time(k,l),p_time(i,j)-p_time(k,l)
-                     nerr= nerr+1  
-                     goto 300	
+                     nerr= nerr+1
+                     goto 300	!cX
                   endif
 
                   iobs=iobs+1
@@ -596,6 +665,7 @@ c remove outliers above the separation-delaytime line:
                      a_dist(iobs)= 0  	! set to 0 so it will be selected first
                      iimp= iimp+1
                   endif
+                  aista(ista)= 1
                   goto 300
                endif
             enddo
@@ -656,6 +726,17 @@ c write out delay times:
       avoff= avoff/npair
       avoff_str= avoff_str/(ipair_str-1)
 
+c write out selected stations:
+      k= 1
+      do i=1,nsta
+        if(aista(i).eq.1) then
+           write(16,'(a,2f13.6,f10.1)')
+     &     s_lab(i),s_lat(i),s_lon(i),s_elv(i)
+           k=k+1
+        endif
+      enddo
+
+      write(*,*)'> stations selected = ',k-1
       write(*,*)'> P-phase pairs total = ',n3
       write(*,*)'> S-phase pairs total = ',n6
       write(*,*)'> outliers = ',nerr,' (',nerr*100/(n3+n6),'%)'
@@ -693,26 +774,32 @@ c write out delay times:
       write(log,*)'> max. offset (km) betw. strongly linked events = ',
      & maxoff_str
 
-
       close(2)
       close(12)
       close(14)
       close(15)
+      close(16)
 
+      call datetime(dattim)
 
-	call datetime(dattim)
+      write (log,'(/,"Done.  ",a25)') dattim
+      close (log)
 
-	write (log,'(/,"Done.  ",a)') dattim
-	close (log)
-
-	write (*,'(/,"Done.  ",a)') dattim
+      write (*,'(/,"Done.  ",a25)') dattim
 
       write(*,'(/,a)')'Output files: dt.ct; event.dat; '//
-     & 'event.sel; ph2dt.log'
+     & 'event.sel; station.sel; ph2dt.log'
       write(*,'(a)')'ph2dt parameters were: '
-      write(*,*)'(minwght,maxdist,maxsep,maxngh,minlnk,'//
+      write(*,'(a)')'(minwght,maxdist,maxsep,maxngh,minlnk,'//
      & 'minobs,maxobs)'
-      write(*,*)minwght,maxdist,maxoffset,mnb,limobs_pair,minobs_pair,
+      write(*,'(f5.2,f9.3,f9.3,i4,i4,i4,i4)')
+     & minwght,maxdist,maxoffset,mnb,limobs_pair,minobs_pair,
      & maxobs_pair
 
+      goto 999
+1041  write(*,*)'>>> Format error in station file.'
+      write (*,*) line
+      stop 'Program aborted.'
+
+999   continue
       end

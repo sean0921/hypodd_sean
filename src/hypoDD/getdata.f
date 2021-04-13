@@ -2,12 +2,12 @@ c Read in data
 
 	subroutine getdata(
      &	log, fn_cc, fn_ct, fn_sta, fn_eve, fn_srcpar,
-     &	idata, iphase, ncusp, icusp,
-     &  maxdist,maxsep_ct,maxsep_cc,
+     &	imod,idata, iphase, ncusp, icusp,
+     &  maxdist,minds,maxds,maxgap,maxsep_ct,maxsep_cc,
      &	noisef_dt, mod_nl, mod_ratio, mod_v, mod_top,
      &	ev_date, ev_time, ev_cusp, ev_lat, ev_lon, ev_dep,
-     &	ev_mag, ev_herr, ev_zerr, ev_res,
-     &	sta_lab, sta_lat, sta_lon,
+     &	ev_mag, ev_herr, ev_zerr, ev_res, ev_fix,
+     &	sta_lab, sta_lat, sta_lon,sta_elv,sta_mod,
      &	dt_sta, dt_dt, dt_qual, dt_c1, dt_c2, dt_idx,
      &	dt_ista, dt_ic1, dt_ic2,dt_offs,
      &	nev, nsta, ndt, nccp, nccs, nctp, ncts,
@@ -18,19 +18,23 @@ c Read in data
 	include 'hypoDD.inc'
 
 c	Parameters:
-	doubleprecision	atoangle	! ASCII-to-angle function
+c	doubleprecision	atoangle	! ASCII-to-angle function
 	integer		log
-	character*80	fn_cc, fn_ct, fn_sta, fn_eve, fn_srcpar
+	character*110	fn_cc, fn_ct, fn_sta, fn_eve, fn_srcpar
+        integer         imod
 	integer		idata
 	integer		iphase
 	integer		ncusp		! No. of events to relocate
 	integer		icusp(MAXEVE)	! [1..ncusp] Keys of events to relocate
 	real		maxdist
+	real		minds
+	real		maxds
+	real		maxgap
 	real		maxsep_ct
 	real		maxsep_cc
 	real		noisef_dt
 	integer		mod_nl
-	real		mod_ratio
+	real		mod_ratio(MAXLAY)
 	real		mod_v(MAXLAY)	! [1..MAXLAY]
 	real		mod_top(MAXLAY)	! [1..MAXLAY]
 	integer		ev_date(MAXEVE)	! [1..MAXEVE]
@@ -43,9 +47,12 @@ c	Parameters:
 	real		ev_herr(MAXEVE)	! [1..nev]
 	real		ev_zerr(MAXEVE)	! [1..nev]
 	real		ev_res(MAXEVE)	! [1..nev]
+        integer         ev_fix(MAXEVE)  ! [1..nev]
 	character	sta_lab(MAXSTA)*7	! [1..MAXSTA]
 	real		sta_lat(MAXSTA)	! [1..MAXSTA]
 	real		sta_lon(MAXSTA)	! [1..MAXSTA]
+        real            sta_elv(MAXSTA) ! [1..MAXSTA]
+        integer         sta_mod(MAXSTA) ! [1..MAXSTA]
 	character	dt_sta(MAXDATA)*7	! [1..MAXDATA]
 	real		dt_dt(MAXDATA)	! [1..MAXDATA]
 	real		dt_qual(MAXDATA)	! [1..MAXDATA]
@@ -63,6 +70,7 @@ c	Parameters:
 	integer		nccs
 	integer		nctp
 	integer		ncts
+	integer		sscanf4		! Formatted string-reading function
 	integer		sscanf3		! Formatted string-reading function
 	real		tmp_xp(MAXSTA,MAXEVE)! [1..MAXSTA, 1..MAXEVE]
 	real		tmp_yp(MAXSTA,MAXEVE)! [1..MAXSTA, 1..MAXEVE]
@@ -75,6 +83,7 @@ c	Local variables:
 	real		azim
 	character	buf1*20		! Input buffer
 	character	buf2*20		! Input buffer
+	character	buf3*20		! Input buffer
 	real		clat
 	real		clon
 	integer		cusperr(34000)	! [1..nerr] Event keys to not locate
@@ -98,7 +107,8 @@ c	Local variables:
 	integer		j
 	integer		k
 	integer		l
-	character	line*200
+cfw120217	character	line*200
+	character	line*220
 	real		otc
 	character	pha*1
 	integer		sta_itmp(MAXSTA)
@@ -112,13 +122,17 @@ c	Local variables:
 	integer		k2
         real 		PI
         parameter       (PI=3.141593)
+	integer	 	ierr	
+	integer	 	n, m	
+	doubleprecision	a, b	
+        integer         tmp1(4*MAXSTA)
 
       call datetime (dattim)
       write (*,'("Reading data ...   ",a)') dattim
       write (log,'(/,"~ Reading data ...   ",a)') dattim
 
 c--Read file with events not to be considered in the relocations
-c--At the moment, hypoDD appears to simply warn you that you are trying
+c--At the moment, hypoDD simply warns you that you are trying
 c  to relocate events you had marked as bad in a file called 'cuspid.err'
       inquire (FILE='cuspid.err',exist=ex)
       if (.not. ex) then
@@ -143,17 +157,44 @@ c     Read event file
 c--Begin earthquake read loop
 c----------------------------------------------------------
 10    read (iunit,'(a)',end=20) line
-      read (line,*,err=1010) ev_date(i), ev_time(i), ev_lat(i),
+
+c linux problem: remove lines until linux problem end and replace with:
+c      read (line,*) ev_date(i), ev_time(i), ev_lat(i),
+c     &   ev_lon(i), ev_dep(i), ev_mag(i), ev_herr(i), ev_zerr(i), 
+c     &   ev_res(i), ev_cusp(i), ev_fix(i)      ! NEW in Version 2, fix any of the parameters
+c       read (line,*,err=11) ev_date(i), ev_time(i), ev_lat(i),
+c     &   ev_lon(i), ev_dep(i), ev_mag(i), ev_herr(i), ev_zerr(i),
+c     &   ev_res(i), ev_cusp(i), ev_fix(i)       ! NEW in Version 2, fix any of the parameters
+c      goto 12
+c11    read (line,*,err=1010) ev_date(i), ev_time(i), ev_lat(i),
+c     &   ev_lon(i), ev_dep(i), ev_mag(i), ev_herr(i), ev_zerr(i),
+c     &   ev_res(i), ev_cusp(i)
+c      ev_fix(i)= 0
+c12    continue
+c linux problem end.
+
+      call nval(line,j)      ! get format:
+      if(j.eq.11) then
+         read (line,*,err=1010) ev_date(i), ev_time(i), ev_lat(i),
+     &   ev_lon(i), ev_dep(i), ev_mag(i), ev_herr(i), ev_zerr(i),
+     &   ev_res(i), ev_cusp(i), ev_fix(i)       ! NEW in Version 2, fix any of the parameters
+      elseif(j.eq.10) then
+         read (line,*,err=1010) ev_date(i), ev_time(i), ev_lat(i),
      &   ev_lon(i), ev_dep(i), ev_mag(i), ev_herr(i), ev_zerr(i),
      &   ev_res(i), ev_cusp(i)
+      ev_fix(i)= 0
+      else
+         goto 1010
+      endif
 
       if (ev_date(i).lt.10000000) ev_date(i) = ev_date(i)+19000000
 
 c--If earthquake shallower than 10m, force it to 10m
 c--This may not be necessary
-      if (ev_dep(i) .lt. 0.01) ev_dep(i) = 1   ! no 0-depth for ttime!!!
+      if (ev_dep(i) .lt. 0.01) ev_dep(i) = 0.01   ! no 0-depth for ttime!!!
+ccc      if (ev_dep(i) .lt. 0.01) ev_dep(i) = 0.05   ! no 0-depth for ttime!!!
 
-c--Check if event is on error list. This appears to be just a warning.
+c--Check if event is on error list. 
       do j=1,nerr
          if (ev_cusp(i).eq.cusperr(j)) then
             write(*,*) 'NOTE: event in error list:', ev_cusp(i)
@@ -217,19 +258,63 @@ c--Read station list
       open (iunit,file=fn_sta,status='unknown')
       i = 1
       ii = 1
+      ierr= 0
 
 30    read (iunit,'(a)',end=40) line
 
-c--Split into fields separated by white space
-         if (sscanf3(line, "%s%s%s", sta_lab(i), buf1, buf2).ne.3) then
-            write (6,*) line
-            stop '** Bad station line'
-         endif
-         call rpad(sta_lab(i))
+c110621 new code to read in station file:
+c     Get format:
+      if(ii.eq.1) call nval(line,j)
 
-c--Convert strings to numbers, interpreting colons, if any.
-         sta_lat(i) = atoangle(buf1)
-         sta_lon(i) = atoangle(buf2)
+      sta_mod(i)= 0
+      sta_elv(i)=0.0
+      if(j.eq.4) then          
+         read(line,*,end=1041,err=1041) 
+     &      sta_lab(i),sta_lat(i),sta_lon(i),sta_elv(i)
+	 sta_elv(i)= sta_elv(i)/1000
+	 if(imod.ne.5.and.sta_elv(i).lt.0.and.sta_elv(i).ne.-999) then
+            sta_elv(i)=0.0
+            ierr=ierr+1
+         endif 
+      elseif(j.eq.3) then          
+         read(line,*,end=1041,err=1041) 
+     &      sta_lab(i),sta_lat(i),sta_lon(i)
+      elseif(j.eq.5 .and. imod.eq.4) then          
+         read(line,*,end=1041,err=1041) 
+     &      sta_lab(i),sta_lat(i),sta_lon(i),sta_elv(i),sta_mod(i)
+         sta_elv(i)= sta_elv(i)/1000
+	 if(imod.ne.5.and.sta_elv(i).lt.0.and.sta_elv(i).ne.-999) then
+            ierr=ierr+1
+         endif 
+      else
+        write (6,*) line
+         stop '>>> Bad station line'
+      endif
+
+c110621: the follwoign appears to be compiler dependent:
+c--Split into fields separated by white space
+c         if (sscanf4(line, "%s%s%s%s", sta_lab(i), buf1, buf2,
+c     &       buf3).eq.4) then
+cc           Convert strings to numbers
+c            sta_lat(i) = atoangle(buf1)
+c            sta_lon(i) = atoangle(buf2)
+c            sta_elv(i) = atoangle(buf3)
+c	    sta_elv(i)= sta_elv(i)/1000
+c	    if(sta_elv(i).lt.0.and.sta_elv(i).ne.-999) then
+c               sta_elv(i)=0.0
+c               ierr=ierr+1
+c            endif 
+c         elseif (sscanf3(line, "%s%s%s", sta_lab(i), buf1, buf2)
+c     &           .eq.3) then
+cc           Convert strings to numbers
+c            sta_lat(i) = atoangle(buf1)
+c            sta_lon(i) = atoangle(buf2)
+c            sta_elv(i) = 0.0 
+c         else
+c            write (6,*) line
+c            stop '>>> Bad station line'
+c         endif
+c         call rpad(sta_lab(i))
 
 c--Skip stations at distances larger than maxdist:
          call delaz(clat, clon, sta_lat(i), sta_lon(i), del, dist, azim)
@@ -248,6 +333,10 @@ c--We now have read the entire station file
       write (log,'("# stations total = ",i6,/,
      & "# stations < maxdist = ",i6)')ii-1,nsta
       write (*,'("# stations < maxdist = ",i6)') nsta
+      write(*,'(a,i5)')
+     &"# stations w/ neg. elevation (set to 0) =",ierr
+      write(log,'(a,i5)')
+     &"# stations w/ neg. elevation (set to 0) =",ierr
       close(iunit)
 
 c--Check for duplicated stations
@@ -509,6 +598,121 @@ c--Open synthetic dtime file
       if (ndt.gt.MAXDATA) stop'>>> Increase MAXDATA in hypoDD.inc.'
       if (ndt.eq.0) stop
 
+c=======
+c-- Build sorted event array
+      call indexxi (nev, ev_cusp, iicusp)
+      do i=1,nev
+         icusp(i) = ev_cusp(iicusp(i)) !icusp is just a workspace array here!
+      enddo
+
+c--Remove event pairs with maximum azimuthal gap > maxgap and distance
+c  outside distance range:
+      if(maxgap.lt.0.and.minds.lt.0.and.maxds.lt.0) goto 170
+      if(maxgap.lt.0) maxgap= 370
+      if(minds.lt.0) minds= 0 
+      if(maxds.lt.0) maxds= 50000 
+c      write(*,*)'starting maxgap selection...'
+
+c     Smaller ID first:
+      do i= 1,ndt
+         if(dt_c1(i).gt.dt_c2(i)) then
+            ic1= dt_c1(i)
+            dt_c1(i)= dt_c2(i)
+            dt_c2(i)= ic1
+            dt_dt(i)= -dt_dt(i)
+         endif
+      enddo
+
+      call indexxi (ndt, dt_c1, dt_ic1)
+      do i= 1,ndt
+         k= 1
+         if(dt_qual(dt_ic1(i)).gt.0) then
+            do j= i,ndt
+               if(k.gt.1.and.dt_c1(dt_ic1(i)).ne.dt_c1(dt_ic1(j))) 
+     &         goto 163 
+               if(dt_qual(dt_ic1(j)).gt.0) then
+                  if(dt_c1(dt_ic1(i)).eq.dt_c1(dt_ic1(j)).and.
+     &               dt_c2(dt_ic1(i)).eq.dt_c2(dt_ic1(j))) then
+                     n= iicusp(ifindi(nev, icusp, dt_c1(dt_ic1(j))))
+                     a= ev_lat(n)
+                     b= ev_lon(n)
+                     do m= 1,nsta
+                       if(dt_sta(dt_ic1(j)).eq.sta_lab(m)) goto 162 
+                     enddo
+                     stop'station error'
+162                  call delaz2(a,b,sta_lat(m),sta_lon(m),
+     &               del,dist,azim)
+                     if(dist.lt.minds.or.dist.gt.maxds) then
+                        dt_qual(dt_ic1(j))= -9
+                     else
+                        tmp1(k)= nint(azim)	
+                        dt_ic2(k)= dt_ic1(j)
+                        k= k+1 
+                     endif
+                  endif
+               endif
+            enddo
+163         k= k-1
+            call sorti (k, tmp1)
+            k= k+1
+            tmp1(k)= tmp1(1)+360
+            do j= 2,k
+               if(tmp1(j) - tmp1(j-1).gt.maxgap) goto 165
+            enddo
+            do j=1,k-1
+               dt_qual(dt_ic2(j))= -dt_qual(dt_ic2(j)) 
+            enddo 
+            goto 166
+165         do j=1,k-1
+               dt_qual(dt_ic2(j))= -9.0
+            enddo 
+         endif
+166      continue
+
+c         do j=1,k-1
+c            write(222,*)'ok',dt_c1(dt_ic2(j)),dt_c2(dt_ic2(j)),
+c     &      dt_qual(dt_ic2(j)),dt_idx(dt_ic2(j))
+c         enddo 
+      enddo
+
+c      do i= 1,ndt
+c         write(222,*) dt_c1(i),dt_c2(i),dt_sta(i),dt_qual(i)
+c      enddo
+      k= 1
+      nccp= 0
+      nccs= 0
+      nctp= 0
+      ncts= 0
+      do i= 1,ndt
+         if(dt_qual(i).gt.-8.99) then
+            dt_c1(k)= dt_c1(i)
+            dt_c2(k)= dt_c2(i)
+            dt_sta(k)= dt_sta(i)
+            dt_dt(k)= dt_dt(i)
+            dt_idx(k)= dt_idx(i)
+            dt_qual(k)= abs(dt_qual(i))
+            if(dt_idx(k).eq.1) nccp= nccp+1
+            if(dt_idx(k).eq.2) nccs= nccs+1
+            if(dt_idx(k).eq.3) nctp= nctp+1
+            if(dt_idx(k).eq.4) ncts= ncts+1
+            k= k+1
+         endif
+      enddo
+      write (*,'("    after gap/distance check: ",i8,
+     & " (",i3,"%)")') k-1,nint((real(k-1)*100)/ndt)
+      write (log,'("    after gap/distance check: ",i8,
+     & " (",i3,"%)")') k-1,nint((real(k-1)*100)/ndt)
+      write(*,*)'   nccp,nccs,nctp,ncts: ',nccp,nccs,nctp,ncts
+      write(log,*)'   nccp,nccs,nctp,ncts: ',nccp,nccs,nctp,ncts
+      ndt= k-1
+
+170   continue
+
+
+
+
+
+c=======
 c--Clean events: dtime match
       do i=1,ndt
          dt_ic1(i) = dt_c1(i)   !dt_ic1 is just a workspace array here!
@@ -530,6 +734,7 @@ c--Clean events: dtime match
          ev_zerr(k) = ev_zerr(i)
          ev_res(k) = ev_res(i)
          ev_cusp(k) = ev_cusp(i)
+         ev_fix(k) = ev_fix(i)
          k = k+1
 175      continue
       enddo
@@ -557,6 +762,8 @@ c--New & fast: clean stations
             sta_lab(k) = sta_lab(i)
             sta_lat(k) = sta_lat(i)
             sta_lon(k) = sta_lon(i)
+            sta_elv(k) = sta_elv(i)
+            sta_mod(k) = sta_mod(i)
             k = k+1
             goto 177
          endif
@@ -587,9 +794,13 @@ c--New & fast indexing station labels and cuspids
       return
 
 c--Error processing
-1010  write (*,*) '** Bad earthquake data, so stop:'
+1010  write (*,*) '>>> Format error in earthquake file.'
       write (*,*) line
       stop
+
+1041   write(*,*)'>>> Format error in station file.'
+      write (*,*) line
+       stop 'Program aborted.'
 
 1051  write (*,'(">>> Format error in cross data file,",/,
      & "OR no origin time corrections ",

@@ -1,5 +1,4 @@
 #ifndef lint
-static char rcsid[] = "$Header: /home1/crhet/julian/HYPODD/hypoDD/RCS/hypot_.c,v 1.1 2001/02/14 00:21:19 julian Exp $";
 #endif /* lint */
 
 #include <math.h>

@@ -7,11 +7,17 @@ program, just go to the appropriate directory and type
 
 	make
 
-It may be necessary to modify the Makefile slightly for different
-compilers.  The versions given here support the GNU g77 compiler and
-SUN's f77 compiler; comments indicate the changes needed for these.
+or type 
 
-The Makefiles can also be used to remove all files that can easily be
+	make 
+
+in the current (./src) directory.
+
+It may be necessary to modify the Makefile slightly for different
+compilers.  The versions given here support the GNU g77 compiler, 
+SUN's f77 compiler, and the gfortran compiler for MacOS and Linux; 
+
+Before compiling, use the Makefiles to remove all files that can easily be
 re-generated.  Type
 
 	make clean

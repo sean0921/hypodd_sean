@@ -20,11 +20,11 @@ c	Local variables:
 	integer	jl
 	integer	kk
 	real	tdir
-	real	thk(20)
+	real	thk(MAXLAY)
 	real	tkj
 	real	tref
 	real	u
-	real	vsq(20)
+	real	vsq(MAXLAY)
 	real	x
 	real	xovmax
 

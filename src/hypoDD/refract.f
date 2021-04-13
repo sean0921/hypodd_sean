@@ -63,19 +63,22 @@ c  that are independent of tkj.
 
 c	Local variables:
 	real	delta
-	real	did(20)
-	real	didj(20)
-	real	j1
-	real	jx
+	real	did(MAXLAY)
+	real	didj(MAXLAY)
+cfw110518	real	j1
+	integer	j1
+cfw110518	real	jx
+	integer	jx
 	integer	l
-	real	lx
+cfw1105018	real	lx
+	integer	lx
 	integer	m
 	integer	m1
 	real	sqt
-	real	tid(20)
+	real	tid(MAXLAY)
 	real	tim
-	real	tinj(20)
-	real	tr(20)
+	real	tinj(MAXLAY)
+	real	tr(MAXLAY)
 
 c  determine tref, kk, didjkk
       call tiddid(jl,nl,v,vsq,thk,tid,did)

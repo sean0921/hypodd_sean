@@ -87,9 +87,9 @@ c new format list weights directly.
 
 c--- re-weighting: :
       if(((idata.eq.1.or.idata.eq.3).and.
-     &    (maxres_cross.ne.-9.or.maxdcc.ne.-9)).or.
+     &    (maxres_cross.ne.-999.or.maxdcc.ne.-999)).or.
      &   ((idata.eq.2.or.idata.eq.3).and.
-     &    (maxres_net.ne.-9.or.maxdct.ne.-9))) then
+     &    (maxres_net.ne.-999.or.maxdct.ne.-999))) then
           write(log,'("re-weighting ... ", a)') dattim
 
 c--- get median and MAD of residuals
@@ -127,6 +127,7 @@ c- catalog data:
                call mdian1(dt_tmp,k-1,mad_ct)
                mad_ct= mad_ct/0.67449    !MAD for gaussian noise
             endif
+
          elseif((idata.eq.1.and.maxres_cross.ge.1).or.
      &       (idata.eq.2.and.maxres_net.ge.1)) then
             do i=1,ndt
@@ -162,7 +163,7 @@ c bi ^5 offset weighting for cross data:
 c    exp needs to be uneven so weights become negative for offsets larger
 c    than 2 km. 2km is hardwired, >>>not anymore since 03/23/00
 c s=linspace(0,2.2,30);ss=(1-(s/2).^5).^5;plot(s,ss);axis([0 2.0 -0.0 1]);
-               if(maxdcc.ne.-9)
+               if(maxdcc.ne.-999)
      & dt_wt(i)= dt_wt(i) * (1 - (dt_offs(i)/(maxdcc*1000))**5)**5
 
 c bi-cube residual weighting:
@@ -182,7 +183,7 @@ c bi ^3 offset weighting for catalog data:
 c    exp needs to be uneven so weights become negative for offsets larger
 c    than 10 km. 10km is hardwired. not anymore since 03/23/00
 c s=linspace(0,11,100);ss=(1-(s/10).^3).^3;plot(s,ss);axis([0 11 -0.1 1]);
-               if(maxdct.ne.-9)
+               if(maxdct.ne.-999)
      &  dt_wt(i)= dt_wt(i) * (1 - (dt_offs(i)/(maxdct*1000))**3)**3
 
 c bi-cube residual weighting:

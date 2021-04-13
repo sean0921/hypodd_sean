@@ -1,6 +1,5 @@
 #ifndef lint
-static char rcsid[] = "$Header: /home1/crhet/julian/HYPODD/hypoDD/RCS/datetime_.c,v 1.1 2001/02/15 21:34:55 julian Exp $";
-#endif /* lint */
+#endif
 
 #include <string.h>
 #include <time.h>

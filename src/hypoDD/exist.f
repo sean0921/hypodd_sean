@@ -3,7 +3,7 @@
 	implicit none
 
 c	Parameters:
-	character	fn*80
+	character	fn*110
 
 c	Local variables
 	logical	ex

@@ -14,20 +14,22 @@ c Get input parameters
 
 	implicit none
 
+        include'hypoDD.inc'
+
 c	Parameters:
 	integer		maxev		! Array dimension
-	integer		maxlyr		! Array dimension
+        integer         maxlyr          ! Array dimension
 	integer		log		! Log-file identifier
-	character	fn_inp*80	! File of control info.
-	character	fn_cc*80	! File of cross-corr. times
-	character	fn_ct*80	! File of catalog times
-	character	fn_sta*80	! Station file
-	character	fn_eve*80	! Event file
-	character	fn_loc*80	! Output file of original locs.
-	character	fn_reloc*80	! Output file of final locs.
-	character	fn_res*80	! Output residual file
-	character	fn_stares*80	! Output station file
-	character	fn_srcpar*80	! Output source-parameter file
+	character	fn_inp*110	! File of control info.
+	character	fn_cc*110	! File of cross-corr. times
+	character	fn_ct*110	! File of catalog times
+	character	fn_sta*110	! Station file
+	character	fn_eve*110	! Event file
+	character	fn_loc*110	! Output file of original locs.
+	character	fn_reloc*110	! Output file of final locs.
+	character	fn_res*110	! Output residual file
+	character	fn_stares*110	! Output station file
+	character	fn_srcpar*110	! Output source-parameter file
 	integer		idata		! 0: Synthetics
 					! 1: Cross-correlation
 					! 2: Catalog
@@ -53,16 +55,19 @@ c	Parameters:
 	integer		niter		! No. of iteration sets
 	integer		aiter(0:10)	! [1..niter] Iterations/set
 	integer		mod_nl		! No. of layers
-	real		mod_ratio	! Vp/Vs
-	real		mod_v(maxlyr)	! [1..mod_nl] Vp values
-	real		mod_top(maxlyr)	! [1..mod_nl] Depths to layers
+cfw110518	real		mod_ratio	! Vp/Vs
+	real		mod_ratio(MAXLAY)	! Vp/Vs
+	real		a
+	real		mod_v(MAXLAY)	! [1..mod_nl] Vp values
+	real		mod_top(MAXLAY)	! [1..mod_nl] Depths to layers
 	integer		iclust		! Cluster to relocate (0: all).
 	integer		ncusp		! No. of event keys in icusp[]
-	integer		icusp(maxev)	! [1..ncusp] Events to relocate
+	integer		icusp(MAXEVE)	! [1..ncusp] Events to relocate
 
 c	Local variables:
 	integer		fu_inp
 	integer		i
+	integer		j
 	integer		ii
 	integer		l
 	character	line*200
@@ -78,7 +83,7 @@ c-- open input file:
       ii= 1
 
 c-- Loop to read each parameter lines, skipping comments
- 210  read (fu_inp,'(a)',end=220) line
+ 210  read (fu_inp,'(a)',end=300) line
       if (line(1:1).eq.'*' .or. line(2:2).eq.'*') goto 210
       if (l.eq.1) read (line,'(a)',err=999) fn_cc
       if (l.eq.2) read (line,'(a)',err=999) fn_ct
@@ -90,8 +95,10 @@ c-- Loop to read each parameter lines, skipping comments
       if (l.eq.8) read (line,'(a)',err=999) fn_res
       if (l.eq.9) read (line,'(a)',err=999) fn_srcpar
       if (l.eq.10) read (line,*,err=999) idata, iphase,maxdist
+      if(maxdist.lt.0) maxdist= 50000
       if (l.eq.11) read (line,*,err=999) minobs_cc,minobs_ct
       if (l.eq.12) read (line,*,err=999) istart, isolv, niter
+      if(niter.gt.10) stop'Maximum for NSET is 10.'
 
 c--Read iteration instructions
       if (l.ge.13 .and. l.le.12+niter) then
@@ -99,23 +106,47 @@ c--Read iteration instructions
          read (line,*,err=999) aiter(i),
      &  awt_ccp(i), awt_ccs(i), amaxres_cross(i), amaxdcc(i),
      &  awt_ctp(i), awt_cts(i), amaxres_net(i), amaxdct(i), adamp(i)
+
+c make hypoDD2.0 compatible:
+        if(amaxres_cross(i).eq.-9) amaxres_cross(i)= -999
+        if(amaxres_net(i).eq.-9) amaxres_net(i)= -999
+        if(amaxdcc(i).eq.-9) amaxdcc(i)= -999
+        if(amaxdct(i).eq.-9) amaxdct(i)= -999
+        if(awt_ccp(i).eq.-9) awt_ccp(i)= -999
+        if(awt_ccs(i).eq.-9) awt_ccs(i)= -999
+        if(awt_ctp(i).eq.-9) awt_ctp(i)= -999
+        if(awt_cts(i).eq.-9) awt_cts(i)= -999
       endif
 
+c--- Read models:
+cfw110812      if (l.eq.13+niter) read(line,*,err=999) mod_nl, a 
       if (l.eq.13+niter) then
-        read(line,*,err=999) mod_nl, mod_ratio
+         read(line,*,err=999) mod_nl, a 
+         do i=1,mod_nl     ! make V2.0 compatible
+            mod_ratio(i)= a
+         enddo
       endif
       if (l.eq.14+niter) read(line,*,err=999) (mod_top(i),i=1,mod_nl)
       if (l.eq.15+niter) read(line,*,err=999) (mod_v(i),i=1,mod_nl)
+cfw110812      do i=1,mod_nl     ! make V2.0 compatible
+cfw110812         mod_ratio(i)= a
+cfw110812      enddo
 
 c--Read specific clusters/events to relocate
       if (l.eq.16+niter) read (line,*,err=999) iclust
       if (l.ge.17+niter) then
-         read (line,*,err=999,end=230) (icusp(i),i=ii,ii+7)
-230      ii= i
+c         read (line,*,err=999,end=230) (icusp(i),i=ii,ii+7)
+c230      ii= i
+         read (line,*,err=999,end=229) (icusp(i),i=ii,ii+7)
+229      do j=ii,ii+7
+            if(icusp(j).eq.0) goto 230
+         enddo
+         if(i.gt.maxeve)stop'Increase MAXEVE array in hypoDD.inc'
+230      ii= j
       endif
       l= l+1
       goto 210
-220   close (fu_inp)
+300   close (fu_inp)
       ncusp= ii-1
 
 c- rearrange aiter:
@@ -151,7 +182,8 @@ c write log output: of newest format
      &fn_reloc(1:trimlen(fn_reloc)),fn_res(1:trimlen(fn_res)),
      &fn_stares(1:trimlen(fn_stares)),fn_srcpar(1:trimlen(fn_srcpar))
 
-      write (log,'("Input parameters: (from ",a,")",/,
+c      write (log,'("Input parameters: (from ",a,")",/,
+      write (log,'("Input parameters: (from ",a," hypoDD vers.1.x)",/,
      &"  cross dtime file: ",a,/,"  catalog dtime file: ",a,/,
      &"  station file: ",a,/,"  event file: ",a,/,
      &"  initial locations: ",a,/,"  relocated events: ",a)')
@@ -184,11 +216,12 @@ c write log output: of newest format
      & i=1,niter)
 
 c--Write crust model
-      write (log, '("  MOD_NL= ",i2,2x,"MOD_RATIO= ",f4.2)')
-     & mod_nl,mod_ratio
-      write(log,'("    MOD_TOP    MOD_V")')
+cfw      write (log, '("  MOD_NL= ",i2,2x,"MOD_RATIO= ",f4.2)')
+      write (log, '("  MOD_NL= ",i2)')
+     & mod_nl
+      write(log,'("    MOD_TOP    MOD_V   MOD_RATIO")')
       do i=1,mod_nl
-          write(log,'(2x,2f9.3)')mod_top(i),mod_v(i)
+          write(log,'(2x,3f9.3)')mod_top(i),mod_v(i),mod_ratio(i)
       enddo
 
 c--Repeat number of clusters, events to relocate
@@ -207,6 +240,10 @@ c--Repeat number of clusters, events to relocate
         write (*,*) 'Relocate ',ncusp,' events'
         write (log,*) 'Relocate ',ncusp,' events'
       end if
+
+      write(*,'(a)')'Use local layered 1D model.'
+      write(log,'(a)')'Use local layered 1D model.'
+
       return
 
 c--Input error handling
