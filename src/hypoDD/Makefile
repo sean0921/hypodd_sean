@@ -31,7 +31,7 @@ listflg = -L -c -O
 
 # Flags for SUN f77 compiler
 #FFLAGS	= -O -I$(INCLDIR) -g
-FFLAGS	= -O -I$(INCLDIR) 
+FFLAGS	= -O -I$(INCLDIR) -Wall -Wimplicit -ggdb
 
 # Following line needed on HP-UX (hasn't been tested, though).
 #LDFLAGS	= +U77

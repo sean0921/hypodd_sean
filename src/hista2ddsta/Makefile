@@ -10,7 +10,7 @@ INCLDIR	= ../../include
 #FFLAGS	= -O -I$(INCLDIR) -fno-silent -Wall -implicit
 
 # Flags for SUN f77 compiler
-FFLAGS	= -O -I$(INCLDIR)
+FFLAGS	= -O -I$(INCLDIR) -Wall -Wimplicit -ggdb
 
 # Following line needed on HP-UX (hasn't been tested, though).
 #LDFLAGS	= +U77

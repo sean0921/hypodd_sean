@@ -8,7 +8,7 @@ CSRCS	=
 OBJS	= $(SRCS:%.f=%.o) $(CSRCS:%.c=%.o)
 CFLAGS	= -O
 #FFLAGS  = -O -fno-silent -Wall -implicit
-FFLAGS	= -O
+FFLAGS	= -O -Wall -Wimplicit -ggdb
 
 LDFLAGS = -L/usr/lib/gcc/i686-apple-darwin10/4.2.1 -lgcc
 
